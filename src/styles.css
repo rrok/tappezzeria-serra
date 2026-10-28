@@ -1,0 +1,88 @@
+:root {
+  --bg-espresso: #120F0D;
+  --bg-leather-dark: #1B1613;
+  --bg-panel-dark: #241E1A;
+  --bg-parchment: #FBF8F3;
+  --bg-ivory-card: #F3EDE2;
+  --bg-sand: #E8DEC8;
+
+  --cognac: #B8642D;
+  --cognac-light: #D48148;
+  --cognac-deep: #8E4618;
+  --brass: #C9A66B;
+  --brass-light: #E2C792;
+  --bordeaux: #7C2326;
+  --verde-british: #1F4435;
+
+  --text-light: #F7F2EB;
+  --text-muted-light: #B8ACA0;
+  --text-dark: #1A1512;
+  --text-muted-dark: #5C5046;
+
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --shadow-soft: 0 14px 36px -8px rgba(18, 15, 13, 0.14);
+  --shadow-deep: 0 24px 48px -12px rgba(0, 0, 0, 0.45);
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-family: var(--font-sans);
+  color: var(--text-dark);
+  background-color: var(--bg-parchment);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* Custom Saddle Stitch Pattern */
+.stitch-border-top {
+  border-top: 2px dashed rgba(201, 166, 107, 0.35);
+}
+
+.stitch-border-bottom {
+  border-bottom: 2px dashed rgba(201, 166, 107, 0.35);
+}
+
+.stitch-frame {
+  position: relative;
+}
+
+.stitch-frame::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 1.5px dashed rgba(201, 166, 107, 0.45);
+  border-radius: calc(var(--radius-md) - 4px);
+  pointer-events: none;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-espresso);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--cognac);
+  border-radius: 5px;
+  border: 2px solid var(--bg-espresso);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cognac-light);
+}

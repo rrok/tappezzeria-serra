@@ -1,0 +1,1018 @@
+<!-- Top Artisan Info Bar -->
+<div class="topbar">
+  <div class="container topbar-inner">
+    <div class="topbar-left">
+      <span class="status-pill" [class.is-open]="workshopStatus().isOpen">
+        <span class="status-dot"></span>
+        {{ workshopStatus().statusText }}
+      </span>
+      <span class="topbar-divider">•</span>
+      <span class="topbar-detail">{{ workshopStatus().detailText }}</span>
+    </div>
+    <div class="topbar-right">
+      <a [href]="info.googleMapsUrl" target="_blank" rel="noopener" class="topbar-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
+        </svg>
+        {{ info.streetAddress }}, {{ info.city }}
+      </a>
+      <span class="topbar-divider">•</span>
+      <a [href]="info.phoneHref" class="topbar-phone">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+        </svg>
+        Tel. {{ info.phoneDisplay }}
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Main Sticky Header -->
+<header class="navbar">
+  <div class="container navbar-inner">
+    <a href="#" class="brand-logo" (click)="closeMobileMenu()">
+      <div class="brand-crest">
+        <span class="crest-initials">TS</span>
+        <span class="crest-stitch"></span>
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">Tappezzeria Serra <small>S.n.c.</small></span>
+        <span class="brand-sub">di Sindoni Claudio &amp; Figlio • Bologna</span>
+      </div>
+    </a>
+
+    <nav class="nav-links" [class.mobile-active]="mobileMenuOpen()">
+      <a href="#bottega" (click)="closeMobileMenu()">La Bottega</a>
+      <a href="#specializzazioni" (click)="closeMobileMenu()">Specializzazioni</a>
+      <a href="#campionario" (click)="closeMobileMenu()">Pelli &amp; Cappotte</a>
+      <a href="#restauri" (click)="closeMobileMenu()">Lavori &amp; Prima/Dopo</a>
+      <a href="#recensioni" (click)="closeMobileMenu()">Recensioni</a>
+      <a href="#preventivo" (click)="closeMobileMenu()" class="nav-cta-mobile">Richiedi Preventivo</a>
+    </nav>
+
+    <div class="nav-actions">
+      <a [href]="info.phoneHref" class="btn-call-outline">
+        <span class="call-icon">☎</span>
+        <span>{{ info.phoneDisplay }}</span>
+      </a>
+      <a href="#preventivo" class="btn-primary-gold">Preventivo &amp; Sede</a>
+      <button
+        type="button"
+        class="mobile-toggle"
+        (click)="toggleMobileMenu()"
+        aria-label="Apri menu di navigazione"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- HERO SECTION -->
+  <section class="hero-section stitch-border-bottom">
+    <div class="hero-backdrop-pattern"></div>
+    <div class="container hero-grid">
+      <div class="hero-content">
+        <div class="artisan-eyebrow">
+          <span class="eyebrow-badge">BOTTEGA STORICA A BOLOGNA</span>
+          <span class="eyebrow-location">Via Emilia Ponente 107/A • Motor Valley</span>
+        </div>
+
+        <h1 class="hero-title">
+          L’arte sellaia di padre in figlio per
+          <span class="title-accent">Auto d’Epoca, Cappotte e Moto.</span>
+        </h1>
+
+        <p class="hero-lead">
+          Da generazioni la famiglia <strong>Sindoni</strong> (<em>Tappezzeria Serra S.n.c. di Sindoni Claudio &amp; Figlio</em>)
+          restaura e confeziona a mano interni in pelle per vetture storiche, cappotte cabriolet in tela
+          Sonnenland®, selle moto personalizzate e cieli auto scollati con precisione sartoriale.
+        </p>
+
+        <div class="hero-specialties-tags">
+          <a href="#specializzazioni" (click)="selectServiceFilter('epoca')" class="spec-chip">
+            <span class="chip-dot"></span> Sedili &amp; Interni Auto d’Epoca
+          </a>
+          <a href="#specializzazioni" (click)="selectServiceFilter('cappotte')" class="spec-chip">
+            <span class="chip-dot"></span> Cappotte Spider &amp; Cabriolet
+          </a>
+          <a href="#specializzazioni" (click)="selectServiceFilter('moto')" class="spec-chip">
+            <span class="chip-dot"></span> Selle Moto &amp; Modifiche Gel
+          </a>
+          <a href="#specializzazioni" (click)="selectServiceFilter('moderne')" class="spec-chip">
+            <span class="chip-dot"></span> Cieli Auto «Pari al Nuovo»
+          </a>
+        </div>
+
+        <div class="hero-cta-group">
+          <a href="#preventivo" class="btn-hero-primary">
+            Configura il tuo Restauro
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+          <a [href]="info.phoneHref" class="btn-hero-secondary">
+            Chiama in Laboratorio: {{ info.phoneDisplay }}
+          </a>
+        </div>
+
+        <div class="hero-trust-strip">
+          <div class="trust-quote">
+            <div class="stars">★★★★★</div>
+            <p>«Il top a Bologna. Hanno tappezzato il cielo scollato della mia auto ed è tornato pari al nuovo!»</p>
+          </div>
+          <div class="trust-club-badge">
+            <span class="club-tag">PARTNER STORICO</span>
+            <span class="club-name">Motoclub &amp; Guzzisti Emiliani</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="hero-image-card stitch-frame">
+          <img
+            src="images/hero-workshop.jpg"
+            alt="Maestro artigiano Tappezzeria Serra al lavoro su pelle cognac per auto d'epoca a Bologna"
+            class="hero-main-img"
+          />
+          <div class="hero-floating-card card-top-right">
+            <span class="floating-label">CUCITURA SARTORIALE</span>
+            <strong>Pelle Pieno Fiore &amp; Tela Sonnenland®</strong>
+            <span class="floating-sub">Lavorazioni certificate per restauri ASI / FIVA</span>
+          </div>
+          <div class="hero-floating-card card-bottom-left">
+            <div class="address-pin">📍</div>
+            <div>
+              <strong>Via Emilia Ponente, 107/A</strong>
+              <span>40133 Bologna (Zona Santa Viola / Borgo Panigale)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Heritage Numbers Bar -->
+    <div class="container">
+      <div class="heritage-pillars">
+        @for (pillar of info.heritagePillars; track pillar.label) {
+          <div class="pillar-item">
+            <span class="pillar-number">{{ pillar.number }}</span>
+            <div class="pillar-copy">
+              <strong>{{ pillar.label }}</strong>
+              <p>{{ pillar.detail }}</p>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- LA BOTTEGA & TRADIZIONE FAMILIARE SINDONI -->
+  <section id="bottega" class="section-bottega">
+    <div class="container">
+      <div class="bottega-grid">
+        <div class="bottega-story">
+          <span class="section-kicker">LA NOSTRA STORIA A BOLOGNA</span>
+          <h2 class="section-heading">
+            Tappezzeria Serra di Sindoni Claudio &amp; Figlio: dove l’abitacolo torna ad avere un’anima.
+          </h2>
+          <p class="story-paragraph">
+            Situata lungo la storica <strong>Via Emilia Ponente al civico 107/A</strong>, alle porte del cuore
+            motoristico di Bologna, <strong>Tappezzeria Serra S.n.c.</strong> è una autentica bottega artigiana a
+            conduzione familiare tramandata da <strong>Claudio Sindoni al figlio Alessandro</strong>.
+          </p>
+          <p class="story-paragraph">
+            In un’epoca di sostituzioni industriali standardizzate, noi continuiamo a lavorare come i grandi maestri
+            sellai emiliani: ascoltiamo il cliente, tocchiamo con mano la struttura del sedile o della capote,
+            selezioniamo pelli bovine italiane, panni di lana storici e tele impermeabili di primo equipaggiamento,
+            eseguendo ogni taglio e ogni ribattitura direttamente sul nostro banco di lavoro.
+          </p>
+
+          <div class="bottega-highlights-box">
+            <div class="highlight-row">
+              <span class="check-badge">✓</span>
+              <div>
+                <strong>Restauri Fedeli all’Originale per Auto d’Epoca</strong>
+                <p>Rispetto rigoroso di trame, cadenini, imbottiture in crine o gommapiuma sagomata e cuciture storiche.</p>
+              </div>
+            </div>
+            <div class="highlight-row">
+              <span class="check-badge">✓</span>
+              <div>
+                <strong>Punto di Riferimento per Motociclisti e Collezionisti</strong>
+                <p>Storica collaborazione con i motoclub del territorio (tra cui i <em>Guzzisti Emiliani</em>) per selle custom, d’epoca e Gran Turismo.</p>
+              </div>
+            </div>
+            <div class="highlight-row">
+              <span class="check-badge">✓</span>
+              <div>
+                <strong>Riparazioni Mirate ed Oneste</strong>
+                <p>Quando possibile ripariamo il singolo fianchetto usurato, il lunotto della cappotta o il cielo scollato, evitando spese superflue.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bottega-process">
+          <div class="process-card-header">
+            <span class="mono-tag">METODO ARTIGIANALE SINDONI</span>
+            <h3>Le 4 Fasi di Lavorazione in Laboratorio</h3>
+            <p>Ogni vettura, cappotta o sella attraversa un controllo rigoroso prima della riconsegna.</p>
+          </div>
+
+          <div class="steps-list">
+            @for (item of craftSteps; track item.step) {
+              <div class="step-card">
+                <div class="step-num">{{ item.step }}</div>
+                <div class="step-body">
+                  <h4>{{ item.title }}</h4>
+                  <p>{{ item.description }}</p>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="bottega-signature">
+            <div class="sig-left">
+              <span class="sig-title">Famiglia Sindoni</span>
+              <span class="sig-role">Maestri Tappezzieri in Bologna • P.IVA {{ info.partitaIva }}</span>
+            </div>
+            <a [href]="info.phoneHref" class="sig-action">Parla con gli Artigiani →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SPECIALIZZAZIONI & SERVIZI FILTERABLE -->
+  <section id="specializzazioni" class="section-services stitch-border-top stitch-border-bottom">
+    <div class="container">
+      <div class="section-header-center">
+        <span class="section-kicker">REPARTI DI LAVORAZIONE</span>
+        <h2 class="section-heading">Maestria Artigianale per Ogni Veicolo</h2>
+        <p class="section-subtitle">
+          Dalle spider degli anni ’50 alle berline contemporanee, fino alle selle motociclistiche su misura:
+          filtra il reparto di tuo interesse per scoprire materiali, tempistiche e dettagli tecnici.
+        </p>
+
+        <!-- Category Filter Bar -->
+        <div class="filter-pills" role="tablist">
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="selectedServiceCategory() === 'tutti'"
+            (click)="selectServiceFilter('tutti')"
+          >
+            Tutte le Lavorazioni (5)
+          </button>
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="selectedServiceCategory() === 'epoca'"
+            (click)="selectServiceFilter('epoca')"
+          >
+            Macchine d’Epoca
+          </button>
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="selectedServiceCategory() === 'cappotte'"
+            (click)="selectServiceFilter('cappotte')"
+          >
+            Cappotte &amp; Cabriolet
+          </button>
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="selectedServiceCategory() === 'moto'"
+            (click)="selectServiceFilter('moto')"
+          >
+            Selle Moto &amp; Scooter
+          </button>
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="selectedServiceCategory() === 'moderne'"
+            (click)="selectServiceFilter('moderne')"
+          >
+            Cieli Auto &amp; Sedili
+          </button>
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="selectedServiceCategory() === 'nautica-arredo'"
+            (click)="selectServiceFilter('nautica-arredo')"
+          >
+            Nautica &amp; Arredo
+          </button>
+        </div>
+      </div>
+
+      <div class="services-list">
+        @for (service of filteredServices(); track service.id) {
+          <article class="service-feature-card">
+            <div class="service-media">
+              <img [src]="service.image" [alt]="service.title" loading="lazy" />
+              <span class="service-badge">{{ service.badge }}</span>
+              <div class="service-time-overlay">
+                <span class="mono-label">TEMPISTICA MEDIA:</span>
+                <strong>{{ service.estimatedTime }}</strong>
+              </div>
+            </div>
+
+            <div class="service-details">
+              <div class="service-meta-top">
+                <span class="service-cat-tag">{{ service.categoryLabel }}</span>
+                <span class="service-location-tag">Eseguito in sede a Bologna</span>
+              </div>
+
+              <h3>{{ service.title }}</h3>
+              <p class="service-subtitle">{{ service.subtitle }}</p>
+              <p class="service-desc">{{ service.description }}</p>
+
+              <div class="service-highlights">
+                <h4>Interventi specifici in bottega:</h4>
+                <ul>
+                  @for (point of service.highlights; track point) {
+                    <li>
+                      <span class="bullet-diamond">◆</span>
+                      <span>{{ point }}</span>
+                    </li>
+                  }
+                </ul>
+              </div>
+
+              <div class="service-footer">
+                <div class="materials-chips">
+                  <span class="materials-label">Materiali impiegati:</span>
+                  <div class="chips-wrap">
+                    @for (mat of service.materials; track mat) {
+                      <span class="mat-chip">{{ mat }}</span>
+                    }
+                  </div>
+                </div>
+
+                <div class="service-actions-row">
+                  <div class="warranty-note">
+                    <span class="shield-icon">★</span>
+                    <span>{{ service.warrantyNote }}</span>
+                  </div>
+                  <button
+                    type="button"
+                    class="btn-service-quote"
+                    (click)="prefillQuoteForService(service)"
+                  >
+                    Richiedi Preventivo per questo lavoro →
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- IL CAMPIONARIO DEL SELLAIO (INTERACTIVE MATERIAL & STITCH EXPLORER) -->
+  <section id="campionario" class="section-campionario">
+    <div class="container">
+      <div class="section-header-center light-header">
+        <span class="section-kicker gold-kicker">TOCCHIAMO CON MANO LA QUALITÀ</span>
+        <h2 class="section-heading light-heading">Il Campionario del Maestro Sellaio</h2>
+        <p class="section-subtitle light-subtitle">
+          Un restauro dura decenni solo se la materia prima è d’eccellenza. Esplora alcuni dei pellami pieno fiore,
+          delle tele per cappotte Sonnenland® e delle cuciture che utilizziamo quotidianamente in Via Emilia Ponente.
+        </p>
+      </div>
+
+      <div class="campionario-interactive-box">
+        <!-- Left: Swatch Selector Grid -->
+        <div class="swatch-selector-panel">
+          <h3 class="panel-label">Seleziona un materiale o lavorazione dal banco:</h3>
+          <div class="swatch-buttons-grid">
+            @for (swatch of swatches; track swatch.id) {
+              <button
+                type="button"
+                class="swatch-btn"
+                [class.selected]="selectedSwatch().id === swatch.id"
+                (click)="selectSwatch(swatch)"
+              >
+                <span
+                  class="swatch-color-circle"
+                  [style.background]="
+                    'linear-gradient(135deg, ' +
+                    swatch.colorHex +
+                    ' 0%, ' +
+                    (swatch.secondaryHex || swatch.colorHex) +
+                    ' 100%)'
+                  "
+                ></span>
+                <div class="swatch-btn-info">
+                  <strong>{{ swatch.name }}</strong>
+                  <span>{{ swatch.origin }}</span>
+                </div>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Right: Active Swatch Live Inspector -->
+        <div class="swatch-inspector-card stitch-frame">
+          <div
+            class="swatch-visual-preview"
+            [attr.data-texture]="selectedSwatch().textureType"
+            [style.--swatch-primary]="selectedSwatch().colorHex"
+            [style.--swatch-secondary]="selectedSwatch().secondaryHex || selectedSwatch().colorHex"
+          >
+            <div class="texture-overlay"></div>
+            <div class="stitch-sample-line"></div>
+            <div class="swatch-preview-badges">
+              <span class="preview-origin-pill">{{ selectedSwatch().origin }}</span>
+              <span class="preview-cat-pill">CAMPIONE REALE IN BOTTEGA</span>
+            </div>
+            <div class="swatch-preview-title">
+              <h3>{{ selectedSwatch().name }}</h3>
+            </div>
+          </div>
+
+          <div class="swatch-inspector-body">
+            <p class="swatch-description">{{ selectedSwatch().description }}</p>
+
+            <div class="swatch-specs-grid">
+              <div class="spec-box">
+                <span class="spec-label">SPESSORE / STRUTTURA</span>
+                <strong>{{ selectedSwatch().specs.spessore }}</strong>
+              </div>
+              <div class="spec-box">
+                <span class="spec-label">TENUTA TERMICA &amp; UV</span>
+                <strong>{{ selectedSwatch().specs.resistenzaUV }}</strong>
+              </div>
+              <div class="spec-box">
+                <span class="spec-label">CONFORMITÀ STORICA</span>
+                <strong>{{ selectedSwatch().specs.autenticita }}</strong>
+              </div>
+            </div>
+
+            <div class="swatch-bestfor-row">
+              <span class="bestfor-label">Ideale per:</span>
+              <div class="bestfor-tags">
+                @for (useCase of selectedSwatch().bestFor; track useCase) {
+                  <span class="usecase-tag">{{ useCase }}</span>
+                }
+              </div>
+            </div>
+
+            <div class="swatch-cta-bar">
+              <p>Vuoi vedere e toccare dal vivo l’intero campionario pelli e tele?</p>
+              <button
+                type="button"
+                class="btn-gold-sm"
+                (click)="prefillQuoteForMaterial(selectedSwatch())"
+              >
+                Scegli questo materiale per il tuo preventivo →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GALLERIA LAVORI & PRIMA / DOPO INTERATTIVO -->
+  <section id="restauri" class="section-portfolio">
+    <div class="container">
+      <div class="section-header-center">
+        <span class="section-kicker">PORTFOLIO LAVORAZIONI A BOLOGNA</span>
+        <h2 class="section-heading">I Nostri Restauri: Confronta Prima e Dopo</h2>
+        <p class="section-subtitle">
+          Ogni progetto racconta una sfida artigianale vinta: da cappotte strappate dal tempo a sedili d’epoca
+          completamente ricostruiti, fino a cieli auto scollati riportati «pari al nuovo».
+        </p>
+
+        <div class="filter-pills">
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="selectedProjectCategory() === 'tutti'"
+            (click)="selectProjectFilter('tutti')"
+          >
+            Tutti i Lavori
+          </button>
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="selectedProjectCategory() === 'cappotte'"
+            (click)="selectProjectFilter('cappotte')"
+          >
+            Cappotte Spider
+          </button>
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="selectedProjectCategory() === 'epoca'"
+            (click)="selectProjectFilter('epoca')"
+          >
+            Interni Auto d’Epoca
+          </button>
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="selectedProjectCategory() === 'moto'"
+            (click)="selectProjectFilter('moto')"
+          >
+            Selle Moto &amp; Guzzi
+          </button>
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="selectedProjectCategory() === 'moderne'"
+            (click)="selectProjectFilter('moderne')"
+          >
+            Cieli Auto Scollati
+          </button>
+        </div>
+      </div>
+
+      <div class="portfolio-grid">
+        @for (proj of filteredProjects(); track proj.id) {
+          <div class="portfolio-card">
+            <div class="portfolio-img-wrap">
+              <img [src]="proj.image" [alt]="proj.title" loading="lazy" />
+              <div class="portfolio-top-badges">
+                <span class="proj-cat">{{ proj.categoryLabel }}</span>
+                <span class="proj-year">{{ proj.year }}</span>
+              </div>
+
+              <!-- Interactive Before / After Toggle Bar -->
+              <div class="comparison-switcher">
+                <button
+                  type="button"
+                  [class.active]="getComparisonMode(proj.id) === 'before'"
+                  (click)="toggleComparison(proj.id, 'before')"
+                >
+                  Stato Prima
+                </button>
+                <button
+                  type="button"
+                  [class.active]="getComparisonMode(proj.id) === 'after'"
+                  (click)="toggleComparison(proj.id, 'after')"
+                >
+                  Dopo il Restauro ✨
+                </button>
+              </div>
+            </div>
+
+            <div class="portfolio-body">
+              <div class="proj-vehicle-line">
+                <span>{{ proj.vehicle }}</span>
+                <span class="proj-client">{{ proj.clientLocation }}</span>
+              </div>
+              <h3>{{ proj.title }}</h3>
+
+              <!-- Dynamic Before / After Box -->
+              @if (getComparisonMode(proj.id) === 'before') {
+                <div class="comparison-box is-before">
+                  <span class="comp-status-tag">PROBLEMATICA INIZIALE (PRIMA):</span>
+                  <p>{{ proj.beforeSummary }}</p>
+                </div>
+              } @else {
+                <div class="comparison-box is-after">
+                  <span class="comp-status-tag">RISULTATO TAPPEZZERIA SERRA (DOPO):</span>
+                  <p>{{ proj.afterSummary }}</p>
+                </div>
+              }
+
+              <div class="proj-specs-mini">
+                <div>
+                  <span class="mini-label">Materiali:</span>
+                  <strong>{{ proj.materialsUsed }}</strong>
+                </div>
+                <div>
+                  <span class="mini-label">Cucitura:</span>
+                  <strong>{{ proj.stitchingType }}</strong>
+                </div>
+              </div>
+
+              <div class="portfolio-card-footer">
+                <span class="hours-badge">⏱ {{ proj.hoursWorked }}</span>
+                <button type="button" class="btn-inspect" (click)="openProjectModal(proj)">
+                  Scheda Tecnica Completa
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- RECENSIONI REALI DEI CLIENTI A BOLOGNA -->
+  <section id="recensioni" class="section-reviews stitch-border-top">
+    <div class="container">
+      <div class="reviews-header-row">
+        <div>
+          <span class="section-kicker">LA VOCE DEI NOSTRI CLIENTI</span>
+          <h2 class="section-heading">Perché a Bologna chi ama la propria auto o moto sceglie Serra</h2>
+          <p class="section-subtitle">
+            Il nostro miglior biglietto da visita è il passaparola tra appassionati d’auto d’epoca, carrozzerie
+            bolognesi e motociclisti che da anni si affidano a Claudio e Alessandro Sindoni.
+          </p>
+        </div>
+
+        <div class="rating-summary-card">
+          <div class="rating-big">5.0</div>
+          <div class="rating-meta">
+            <div class="stars-gold">★★★★★</div>
+            <strong>Valutazione Eccellente a Bologna</strong>
+            <span>Basata sulle recensioni di clienti verificati in Via Emilia Ponente 107/A</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="reviews-grid">
+        @for (rev of reviews; track rev.id) {
+          <blockquote class="review-card">
+            <div class="review-card-top">
+              <span class="review-highlight-pill">{{ rev.highlightTag }}</span>
+              <span class="review-stars">★★★★★</span>
+            </div>
+            <p class="review-quote">“{{ rev.quote }}”</p>
+            <footer class="review-footer">
+              <div class="reviewer-avatar">{{ rev.author.charAt(0) }}</div>
+              <div class="reviewer-info">
+                <strong>{{ rev.author }}</strong>
+                <span>{{ rev.vehicleOrWork }} • <em>{{ rev.source }}</em></span>
+              </div>
+            </footer>
+          </blockquote>
+        }
+      </div>
+
+      <!-- Guzzisti Emiliani & Motor Valley Banner -->
+      <div class="motoclub-banner stitch-frame">
+        <div class="motoclub-content">
+          <span class="motoclub-badge">TRADIZIONE MOTOR VALLEY BOLOGNA</span>
+          <h3>Convenzioni con Motoclub, Auto Storiche e Carrozzerie</h3>
+          <p>
+            La <strong>Tappezzeria Serra S.n.c.</strong> è storicamente scelta da club motociclistici emiliani (come i
+            <em>Guzzisti Emiliani</em>), collezionisti ASI e officine di restauro per la fedeltà delle lavorazioni e il
+            rispetto rigoroso delle tempistiche di consegna.
+          </p>
+        </div>
+        <div class="motoclub-cta">
+          <a [href]="info.phoneHref" class="btn-primary-gold">Chiama 051 382482</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONFIGURATORE PREVENTIVO & CONTATTI / MAPPA VIA EMILIA PONENTE 107/A -->
+  <section id="preventivo" class="section-contact">
+    <div class="container">
+      <div class="contact-grid">
+        <!-- Left Column: Interactive Quote Configurator -->
+        <div class="quote-form-card">
+          <span class="section-kicker">CONSULENZA DIRETTA CON GLI ARTIGIANI</span>
+          <h2>Richiedi un Preventivo o Prenota una Visione in Bottega</h2>
+          <p class="form-intro">
+            Per lavori su auto d’epoca, cappotte o selle personalizzate consigliamo sempre una breve telefonata allo
+            <strong>051 382482</strong> o un passaggio in <strong>Via Emilia Ponente 107/A</strong> per valutare insieme
+            i materiali. Puoi anche preparare qui la tua scheda tecnica:
+          </p>
+
+          <form class="craft-form" (ngSubmit)="submitQuoteRequest()">
+            <div class="form-row-2">
+              <div class="form-group">
+                <label for="serviceType">Tipologia di Lavorazione</label>
+                <select
+                  id="serviceType"
+                  name="serviceType"
+                  [(ngModel)]="quoteForm.serviceType"
+                >
+                  <option value="Restauro Interni Auto d’Epoca">Restauro Interni Auto d’Epoca (Sedili / Pannelli / Moquette)</option>
+                  <option value="Cappotta Cabriolet / Spider">Cappotta per Cabriolet o Spider (Sostituzione o Lunotto)</option>
+                  <option value="Sella Moto / Scooter su Misura">Sella Moto o Scooter (Rifacimento / Restauro / Gel)</option>
+                  <option value="Rifacimento Cielo Auto Scollato">Rifacimento Cielo Auto Scollato (Imperiale)</option>
+                  <option value="Riparazione Fianchetto Sedile / Volante">Riparazione Sedile, Fianchetto o Volante Auto Moderna</option>
+                  <option value="Tappezzeria Nautica o Arredo Classico">Cuscineria Nautica, Aeronautica o Poltrona/Divano</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="materialPreference">Materiale / Finitura Preferita</label>
+                <select
+                  id="materialPreference"
+                  name="materialPreference"
+                  [(ngModel)]="quoteForm.materialPreference"
+                >
+                  <option value="Vera Pelle Pieno Fiore / Connolly">Vera Pelle Pieno Fiore Italiana / Stile Connolly</option>
+                  <option value="Tela Cappotta Sonnenland® Triplo Strato">Tela Cappotta Sonnenland® Originale / Mohair</option>
+                  <option value="Panno Lancia / Vipla / Skai Storico">Panno Lancia Storico / Vipla / Skai d’Epoca</option>
+                  <option value="Tessuto Cielo Auto Originale Accoppiato">Tessuto Cielo Auto Originale Accoppiato Termoresistente</option>
+                  <option value="Pelle / Bielastico Moto Antiscivolo">Pelle o Bielastico Moto Antiscivolo Idrorepellente</option>
+                  <option value="Da valutare in bottega con campionario">Da valutare in bottega visionando il campionario</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label for="vehicleModel">Marca e Modello (Auto / Moto / Arredo)</label>
+                <input
+                  type="text"
+                  id="vehicleModel"
+                  name="vehicleModel"
+                  [(ngModel)]="quoteForm.vehicleModel"
+                  placeholder="es. Alfa Romeo Duetto, Moto Guzzi V7, Audi A4..."
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="vehicleYear">Anno del Veicolo (opzionale)</label>
+                <input
+                  type="text"
+                  id="vehicleYear"
+                  name="vehicleYear"
+                  [(ngModel)]="quoteForm.vehicleYear"
+                  placeholder="es. 1968 oppure 2016"
+                />
+              </div>
+            </div>
+
+            <div class="form-checkboxes">
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  name="needsGelInsert"
+                  [(ngModel)]="quoteForm.needsGelInsert"
+                />
+                <span>Richiedo inserimento lastra <strong>Comfort Gel + Memory Foam</strong> (per Selle Moto)</span>
+              </label>
+
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  name="needsInspection"
+                  [(ngModel)]="quoteForm.needsInspection"
+                />
+                <span>Posso passare in <strong>Via Emilia Ponente 107/A</strong> per far visionare il veicolo agli artigiani</span>
+              </label>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label for="customerName">Il Tuo Nome e Cognome</label>
+                <input
+                  type="text"
+                  id="customerName"
+                  name="customerName"
+                  [(ngModel)]="quoteForm.customerName"
+                  placeholder="Es. Mario Rossi"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="customerPhone">Recapito Telefonico</label>
+                <input
+                  type="tel"
+                  id="customerPhone"
+                  name="customerPhone"
+                  [(ngModel)]="quoteForm.customerPhone"
+                  placeholder="Es. 335 1234567"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="notes">Dettagli sul lavoro richiesto</label>
+              <textarea
+                id="notes"
+                name="notes"
+                rows="3"
+                [(ngModel)]="quoteForm.notes"
+                placeholder="Descrivi brevemente lo stato attuale (es. cielo scollato, lunotto cappotta opacizzato, sedile guida usurato...)"
+              ></textarea>
+            </div>
+
+            <div class="form-submit-row">
+              <button type="submit" class="btn-submit-craft">
+                Genera Riepilogo Richiesta Preventivo
+              </button>
+              <a [href]="info.phoneHref" class="btn-call-direct">
+                Oppure chiama subito: {{ info.phoneDisplay }}
+              </a>
+            </div>
+          </form>
+
+          @if (quoteSubmitted()) {
+            <div class="quote-ready-box">
+              <div class="ready-header">
+                <span class="ready-badge">SCHEDA PRONTA PER L’INVIO</span>
+                <h4>Riepilogo per Tappezzeria Serra S.n.c.</h4>
+              </div>
+              <p class="ready-summary">
+                <strong>Intervento:</strong> {{ quoteForm.serviceType }}<br />
+                <strong>Materiale scelto:</strong> {{ quoteForm.materialPreference }}<br />
+                <strong>Veicolo:</strong> {{ quoteForm.vehicleModel || 'Non specificato' }}
+                {{ quoteForm.vehicleYear ? '(' + quoteForm.vehicleYear + ')' : '' }}
+              </p>
+              <div class="ready-actions">
+                <a [href]="getMailtoLink()" class="btn-send-email">
+                  ✉ Invia Email a {{ info.email }}
+                </a>
+                <button type="button" class="btn-copy-summary" (click)="copySummaryToClipboard()">
+                  {{ copiedConfirmation() ? '✓ Riepilogo Copiato!' : 'Copia testo riepilogo' }}
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Right Column: Workshop Address, Hours & Interactive Map -->
+        <div class="workshop-location-column">
+          <div class="location-info-card stitch-frame">
+            <span class="mono-tag">DOVE TROVARCI A BOLOGNA</span>
+            <h3>{{ info.legalName }}</h3>
+            <p class="location-district">{{ info.district }}</p>
+
+            <div class="contact-details-list">
+              <div class="contact-item">
+                <div class="contact-icon">📍</div>
+                <div>
+                  <span class="item-label">INDIRIZZO LABORATORIO</span>
+                  <strong>{{ info.streetAddress }}, {{ info.postalCode }} {{ info.city }}</strong>
+                  <span class="item-note">Facilmente raggiungibile da Tangenziale Uscita 2 (Borgo Panigale) o da Porta Saffi / Ospedale Maggiore, con comodo accesso per carico/scarico sedili e moto.</span>
+                </div>
+              </div>
+
+              <div class="contact-item">
+                <div class="contact-icon">📞</div>
+                <div>
+                  <span class="item-label">TELEFONO DIRETTO BOTTEGA</span>
+                  <strong><a [href]="info.phoneHref">{{ info.phoneDisplay }}</a></strong>
+                  <span class="item-note">Consigliato il contatto telefonico preventivo per concordare sopralluoghi su auto d’epoca e rifacimenti completi.</span>
+                </div>
+              </div>
+
+              <div class="contact-item">
+                <div class="contact-icon">✉️</div>
+                <div>
+                  <span class="item-label">EMAIL</span>
+                  <strong><a [href]="'mailto:' + info.email">{{ info.email }}</a></strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Opening Hours Box -->
+            <div class="hours-table-box">
+              <div class="hours-header">
+                <h4>Orari di Apertura Laboratorio</h4>
+                <span class="live-status-mini" [class.open]="workshopStatus().isOpen">
+                  {{ workshopStatus().statusText }}
+                </span>
+              </div>
+              <div class="hours-rows">
+                @for (h of info.hours; track h.days) {
+                  <div class="hour-row" [class.closed-row]="!h.open">
+                    <span class="hour-day">{{ h.days }}</span>
+                    <div class="hour-slots">
+                      <span>{{ h.morning }}</span>
+                      @if (h.open) {
+                        <span class="slot-sep">/</span>
+                      }
+                      <span>{{ h.afternoon }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Embedded Google Map of Via Emilia Ponente 107/A Bologna -->
+            <div class="map-embed-wrapper">
+              <iframe
+                title="Mappa Tappezzeria Serra Snc Via Emilia Ponente 107/A Bologna"
+                src="https://www.google.com/maps?q=Via+Emilia+Ponente+107A,+40133+Bologna+BO&output=embed"
+                width="100%"
+                height="230"
+                style="border:0;"
+                allowfullscreen=""
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+              ></iframe>
+              <a
+                [href]="info.googleMapsUrl"
+                target="_blank"
+                rel="noopener"
+                class="btn-open-maps"
+              >
+                Apri Indicazioni Stradali su Google Maps ↗
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- FOOTER STORICO -->
+<footer class="site-footer stitch-border-top">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <div class="brand-logo footer-logo">
+        <div class="brand-crest">
+          <span class="crest-initials">TS</span>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">Tappezzeria Serra <small>S.n.c.</small></span>
+          <span class="brand-sub">di Sindoni Claudio &amp; Figlio • Bologna</span>
+        </div>
+      </div>
+      <p class="footer-bio">
+        Bottega artigiana storica a Bologna specializzata in tappezzeria e selleria in pelle e tessuto per
+        macchine d’epoca, cappotte cabriolet, selle moto e scooter, cieli auto, nautica e arredamento classico.
+      </p>
+      <div class="footer-legal-badges">
+        <span>P.IVA: {{ info.partitaIva }}</span>
+        <span>•</span>
+        <span>Cod. ATECO: {{ info.codiceAteco }}</span>
+      </div>
+    </div>
+
+    <div class="footer-col">
+      <h4>Lavorazioni Artigianali</h4>
+      <ul>
+        <li><a href="#specializzazioni" (click)="selectServiceFilter('epoca')">Sedili e Interni Auto d’Epoca</a></li>
+        <li><a href="#specializzazioni" (click)="selectServiceFilter('cappotte')">Cappotte Cabriolet &amp; Lunotti</a></li>
+        <li><a href="#specializzazioni" (click)="selectServiceFilter('moto')">Selle Moto, Custom &amp; Comfort Gel</a></li>
+        <li><a href="#specializzazioni" (click)="selectServiceFilter('moderne')">Ripristino Cieli Auto Scollati</a></li>
+        <li><a href="#specializzazioni" (click)="selectServiceFilter('nautica-arredo')">Nautica, Avio &amp; Poltrone</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>Contatti &amp; Sede</h4>
+      <ul class="footer-contact-list">
+        <li>📍 {{ info.streetAddress }}, {{ info.postalCode }} {{ info.city }}</li>
+        <li>📞 <a [href]="info.phoneHref">{{ info.phoneDisplay }}</a></li>
+        <li>✉️ <a [href]="'mailto:' + info.email">{{ info.email }}</a></li>
+        <li>🕒 Lun – Ven: 08:00–12:30 / 14:30–18:30</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="container footer-bottom">
+    <p>© {{ info.legalName }} – Tutti i diritti riservati. Artigiani Sellai a Bologna in Via Emilia Ponente 107/A.</p>
+    <p class="footer-craft-note">Cucito su misura nel cuore della Motor Valley bolognese.</p>
+  </div>
+</footer>
+
+<!-- MODAL SCHEDA TECNICA DI RESTAURO -->
+@if (activeModalProject(); as modalProj) {
+  <div class="modal-backdrop" (click)="closeProjectModal()">
+    <div class="modal-dialog stitch-frame" (click)="$event.stopPropagation()">
+      <button type="button" class="modal-close" (click)="closeProjectModal()" aria-label="Chiudi scheda">✕</button>
+      <div class="modal-grid">
+        <div class="modal-img-col">
+          <img [src]="modalProj.image" [alt]="modalProj.title" />
+          <div class="modal-caption">
+            <span>{{ modalProj.vehicle }} ({{ modalProj.year }})</span>
+            <span>{{ modalProj.clientLocation }}</span>
+          </div>
+        </div>
+        <div class="modal-info-col">
+          <span class="mono-tag">SCHEDA TECNICA D’INTERVENTO</span>
+          <h3>{{ modalProj.title }}</h3>
+
+          <div class="modal-comparison-boxes">
+            <div class="modal-box before">
+              <strong>Condizione di partenza (Prima):</strong>
+              <p>{{ modalProj.beforeSummary }}</p>
+            </div>
+            <div class="modal-box after">
+              <strong>Lavorazione eseguita in bottega (Dopo):</strong>
+              <p>{{ modalProj.afterSummary }}</p>
+            </div>
+          </div>
+
+          <div class="modal-tech-list">
+            <div><span>Materiali certificati:</span> <strong>{{ modalProj.materialsUsed }}</strong></div>
+            <div><span>Tipologia cucitura:</span> <strong>{{ modalProj.stitchingType }}</strong></div>
+            <div><span>Ore di manodopera sellaia:</span> <strong>{{ modalProj.hoursWorked }}</strong></div>
+          </div>
+
+          <div class="modal-actions">
+            <a href="#preventivo" class="btn-primary-gold" (click)="closeProjectModal()">
+              Richiedi un lavoro simile in bottega →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
