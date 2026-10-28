@@ -30,11 +30,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Angular App for GitHub Pages (rrok.github.io/tappezzeria-serra)
-        run: npx ng build --configuration production --base-href /tappezzeria-serra/
+      - name: Build Angular App for Custom Domain (tappezzeria-serra.it)
+        run: npx ng build --configuration production --base-href /
 
-      - name: Copy index.html to 404.html for SPA routing
-        run: cp dist/tappezzeria-serra/browser/index.html dist/tappezzeria-serra/browser/404.html
+      - name: Ensure CNAME and 404.html for SPA routing
+        run: |
+          cp dist/tappezzeria-serra/browser/index.html dist/tappezzeria-serra/browser/404.html
+          echo "tappezzeria-serra.it" > dist/tappezzeria-serra/browser/CNAME
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
