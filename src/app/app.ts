@@ -1,4 +1,4 @@
-import { Component, computed, signal, OnInit } from '@angular/core';
+import { Component, computed, signal, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -28,6 +28,19 @@ export class App implements OnInit {
 
   // Mobile menu state
   readonly mobileMenuOpen = signal(false);
+
+  // Back to top button visibility when scrolling down
+  readonly showBackToTop = signal(false);
+
+  @HostListener('window:scroll')
+  onWindowScroll(): void {
+    const scrollPos = window.scrollY || document.documentElement.scrollTop || 0;
+    this.showBackToTop.set(scrollPos > 360);
+  }
+
+  scrollToTop(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
   // Real-time workshop open status (Bologna time)
   readonly workshopStatus = signal<{ isOpen: boolean; statusText: string; detailText: string }>({

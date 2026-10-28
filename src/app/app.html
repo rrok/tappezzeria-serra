@@ -227,6 +227,19 @@
         </div>
 
         <div class="bottega-process">
+          <div class="stitching-gif-showcase stitch-frame">
+            <img
+              src="images/mani-cucitura.gif"
+              alt="Animazione mani artigiane che cuciono a mano la pelle in Tappezzeria Serra a Bologna"
+              class="stitching-gif-img"
+              loading="lazy"
+            />
+            <div class="stitching-gif-caption">
+              <span class="gif-live-dot"></span>
+              <span>Cucitura a mano a doppio ago con filo incerato ad alta tenacità</span>
+            </div>
+          </div>
+
           <div class="process-card-header">
             <span class="mono-tag">METODO ARTIGIANALE SINDONI</span>
             <h3>Le 4 Fasi di Lavorazione in Laboratorio</h3>
@@ -806,12 +819,24 @@
                 <span class="ready-badge">SCHEDA PRONTA PER L’INVIO</span>
                 <h4>Riepilogo per Tappezzeria Serra S.n.c.</h4>
               </div>
-              <p class="ready-summary">
-                <strong>Intervento:</strong> {{ quoteForm.serviceType }}<br />
-                <strong>Materiale scelto:</strong> {{ quoteForm.materialPreference }}<br />
-                <strong>Veicolo:</strong> {{ quoteForm.vehicleModel || 'Non specificato' }}
-                {{ quoteForm.vehicleYear ? '(' + quoteForm.vehicleYear + ')' : '' }}
-              </p>
+              <div class="ready-summary">
+                <div><strong>Intervento:</strong> {{ quoteForm.serviceType }}</div>
+                <div><strong>Materiale scelto:</strong> {{ quoteForm.materialPreference }}</div>
+                <div>
+                  <strong>Veicolo:</strong> {{ quoteForm.vehicleModel || 'Non specificato' }}
+                  {{ quoteForm.vehicleYear ? '(' + quoteForm.vehicleYear + ')' : '' }}
+                </div>
+                @if (quoteForm.customerName || quoteForm.customerPhone) {
+                  <div>
+                    <strong>Cliente:</strong> {{ quoteForm.customerName || 'Non indicato' }}
+                    {{ quoteForm.customerPhone ? ' • Tel. ' + quoteForm.customerPhone : '' }}
+                  </div>
+                }
+                <div class="ready-notes-block">
+                  <strong>Dettagli sul lavoro richiesto:</strong>
+                  <p>{{ quoteForm.notes || 'Nessun dettaglio aggiuntivo indicato.' }}</p>
+                </div>
+              </div>
               <div class="ready-actions">
                 <a [href]="getMailtoLink()" class="btn-send-email">
                   ✉ Invia Email a {{ info.email }}
@@ -1011,3 +1036,18 @@
     </div>
   </div>
 }
+
+<!-- FLOATING BACK TO TOP BUTTON -->
+<button
+  type="button"
+  class="back-to-top-btn"
+  [class.visible]="showBackToTop()"
+  (click)="scrollToTop()"
+  aria-label="Torna in alto"
+  title="Torna in alto"
+>
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"></polyline>
+  </svg>
+  <span>Torna su</span>
+</button>
