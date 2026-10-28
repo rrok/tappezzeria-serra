@@ -77,9 +77,7 @@ export class App implements OnInit {
     customerName: '',
     customerPhone: '',
     customerEmail: '',
-    notes: '',
-    needsGelInsert: false,
-    needsInspection: true
+    notes: ''
   };
 
   readonly quoteSubmitted = signal(false);
@@ -226,8 +224,6 @@ export class App implements OnInit {
       `- Tipologia intervento: ${this.quoteForm.serviceType}`,
       `- Materiale preferito: ${this.quoteForm.materialPreference}`,
       `- Veicolo / Modello: ${this.quoteForm.vehicleModel || 'Da specificare'} ${this.quoteForm.vehicleYear ? '(' + this.quoteForm.vehicleYear + ')' : ''}`,
-      `- Inserto Comfort Gel / Memory (se sella moto): ${this.quoteForm.needsGelInsert ? 'Sì' : 'No'}`,
-      `- Disponibile per visione in Via Emilia Ponente 107/A: ${this.quoteForm.needsInspection ? 'Sì' : 'Preventivo preliminare'}`,
       ``,
       `Note sul lavoro:`,
       `${this.quoteForm.notes || 'Nessuna nota aggiuntiva.'}`,

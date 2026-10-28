@@ -42,10 +42,13 @@ html {
   color: var(--text-dark);
   background-color: var(--bg-parchment);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 body {
   overflow-x: hidden;
+  max-width: 100%;
   line-height: 1.6;
 }
 

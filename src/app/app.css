@@ -1,7 +1,23 @@
 .container {
   max-width: 1260px;
+  width: 100%;
   margin: 0 auto;
   padding: 0 24px;
+}
+
+/* Prevent CSS Grid children from overflowing mobile viewports */
+.hero-grid > *,
+.bottega-grid > *,
+.service-feature-card > *,
+.campionario-interactive-box > *,
+.portfolio-grid > *,
+.reviews-grid > *,
+.contact-grid > *,
+.form-row-2 > *,
+.footer-grid > *,
+.contact-item > div {
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* ==========================================
@@ -303,6 +319,13 @@
   font-family: var(--font-mono);
   font-size: 0.8rem;
   color: var(--brass-light);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.eyebrow-location:hover {
+  color: #FFFFFF;
+  text-decoration: underline;
 }
 
 .hero-title {
@@ -518,6 +541,23 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  text-decoration: none;
+  transition: transform 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.clickable-address-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--brass-light);
+  background: rgba(28, 21, 18, 0.96);
+}
+
+.inline-contact-link {
+  color: var(--cognac-deep);
+  text-decoration: underline;
+}
+
+.inline-contact-link:hover {
+  color: var(--cognac);
 }
 
 .address-pin {
@@ -1731,6 +1771,8 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
+  width: 100%;
 }
 
 .form-group label {
@@ -1742,6 +1784,9 @@
 .form-group input,
 .form-group select,
 .form-group textarea {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   font-family: var(--font-sans);
   font-size: 0.9rem;
   padding: 11px 13px;
@@ -1749,6 +1794,7 @@
   border: 1px solid #CBBBA4;
   background: #FCF9F5;
   color: var(--text-dark);
+  text-overflow: ellipsis;
   transition: border-color 0.2s;
 }
 
@@ -1921,11 +1967,13 @@
   display: block;
   font-size: 0.98rem;
   color: #FFF;
+  overflow-wrap: anywhere;
 }
 
 .contact-item strong a {
   color: var(--brass-light);
   text-decoration: none;
+  overflow-wrap: anywhere;
 }
 
 .item-note {
@@ -1947,6 +1995,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-bottom: 12px;
 }
 
@@ -1971,13 +2021,21 @@
 .hour-row {
   display: flex;
   justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 12px;
   font-size: 0.82rem;
-  padding: 6px 0;
+  padding: 8px 0;
   border-top: 1px dashed rgba(255, 255, 255, 0.1);
 }
 
-.hour-Slots {
+.hour-day {
+  font-weight: 600;
+}
+
+.hour-slots {
   font-family: var(--font-mono);
+  font-size: 0.78rem;
 }
 
 .closed-row {
@@ -2195,23 +2253,35 @@
   .campionario-interactive-box,
   .contact-grid,
   .modal-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .heritage-pillars {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .portfolio-grid,
   .reviews-grid,
   .footer-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
 @media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
+
   .topbar-detail {
     display: none;
+  }
+
+  .brand-name {
+    font-size: 1.2rem;
+  }
+
+  .brand-sub {
+    font-size: 0.68rem;
   }
 
   .nav-links {
@@ -2245,16 +2315,45 @@
     display: flex;
   }
 
+  .section-bottega,
+  .section-services,
+  .section-campionario,
+  .section-portfolio,
+  .section-reviews,
+  .section-contact {
+    padding: 52px 0;
+  }
+
   .heritage-pillars,
   .form-row-2,
   .swatch-specs-grid,
   .hero-trust-strip {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .service-details,
   .quote-form-card,
-  .location-info-card {
-    padding: 22px;
+  .location-info-card,
+  .bottega-process,
+  .swatch-selector-panel,
+  .swatch-inspector-body {
+    padding: 20px 16px;
+  }
+
+  .quote-form-card h2,
+  .location-info-card h3 {
+    font-size: 1.55rem;
+    overflow-wrap: break-word;
+  }
+
+  .hour-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .btn-submit-craft {
+    width: 100%;
+    text-align: center;
   }
 }

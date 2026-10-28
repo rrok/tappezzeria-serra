@@ -71,7 +71,7 @@ export const WORKSHOP_INFO = {
   email: 'tappezzeriaserra.bo@gmail.com',
   partitaIva: '03397670377',
   codiceAteco: '95.24.02 – Laboratori di tappezzeria artigianale',
-  googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Tappezzeria+Serra+Via+Emilia+Ponente+107+Bologna',
+  googleMapsUrl: 'https://www.google.com/maps/dir/?api=1&destination=Tappezzeria+Serra+Via+Emilia+Ponente+107A+40133+Bologna+BO&dir_action=navigate',
   hours: [
     { days: 'Lunedì – Venerdì', morning: '08:00 – 12:30', afternoon: '14:30 – 18:30', open: true },
     { days: 'Sabato – Domenica', morning: 'Chiuso', afternoon: 'Su appuntamento per consegne', open: false }

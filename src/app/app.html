@@ -79,7 +79,9 @@
       <div class="hero-content">
         <div class="artisan-eyebrow">
           <span class="eyebrow-badge">BOTTEGA STORICA A BOLOGNA</span>
-          <span class="eyebrow-location">Via Emilia Ponente 107/A • Motor Valley</span>
+          <a [href]="info.googleMapsUrl" target="_blank" rel="noopener" class="eyebrow-location">
+            📍 Via Emilia Ponente 107/A • Avvia Navigazione
+          </a>
         </div>
 
         <h1 class="hero-title">
@@ -145,13 +147,19 @@
             <strong>Pelle Pieno Fiore &amp; Tela Sonnenland®</strong>
             <span class="floating-sub">Lavorazioni certificate per restauri ASI / FIVA</span>
           </div>
-          <div class="hero-floating-card card-bottom-left">
+          <a
+            [href]="info.googleMapsUrl"
+            target="_blank"
+            rel="noopener"
+            class="hero-floating-card card-bottom-left clickable-address-card"
+            title="Clicca per aprire Google Maps e avviare la navigazione"
+          >
             <div class="address-pin">📍</div>
             <div>
-              <strong>Via Emilia Ponente, 107/A</strong>
-              <span>40133 Bologna (Zona Santa Viola / Borgo Panigale)</span>
+              <strong>Via Emilia Ponente, 107/A ↗</strong>
+              <span>40133 Bologna • Clicca per avviare la navigazione</span>
             </div>
-          </div>
+          </a>
         </div>
       </div>
     </div>
@@ -681,8 +689,9 @@
           <h2>Richiedi un Preventivo o Prenota una Visione in Bottega</h2>
           <p class="form-intro">
             Per lavori su auto d’epoca, cappotte o selle personalizzate consigliamo sempre una breve telefonata allo
-            <strong>051 382482</strong> o un passaggio in <strong>Via Emilia Ponente 107/A</strong> per valutare insieme
-            i materiali. Puoi anche preparare qui la tua scheda tecnica:
+            <strong><a [href]="info.phoneHref" class="inline-contact-link">051 382482</a></strong> o un passaggio in
+            <strong><a [href]="info.googleMapsUrl" target="_blank" rel="noopener" class="inline-contact-link">Via Emilia Ponente 107/A ↗</a></strong>
+            per valutare insieme i materiali. Puoi anche preparare qui la tua scheda tecnica:
           </p>
 
           <form class="craft-form" (ngSubmit)="submitQuoteRequest()">
@@ -700,6 +709,7 @@
                   <option value="Rifacimento Cielo Auto Scollato">Rifacimento Cielo Auto Scollato (Imperiale)</option>
                   <option value="Riparazione Fianchetto Sedile / Volante">Riparazione Sedile, Fianchetto o Volante Auto Moderna</option>
                   <option value="Tappezzeria Nautica o Arredo Classico">Cuscineria Nautica, Aeronautica o Poltrona/Divano</option>
+                  <option value="Altro">Altro</option>
                 </select>
               </div>
 
@@ -716,6 +726,7 @@
                   <option value="Tessuto Cielo Auto Originale Accoppiato">Tessuto Cielo Auto Originale Accoppiato Termoresistente</option>
                   <option value="Pelle / Bielastico Moto Antiscivolo">Pelle o Bielastico Moto Antiscivolo Idrorepellente</option>
                   <option value="Da valutare in bottega con campionario">Da valutare in bottega visionando il campionario</option>
+                  <option value="Altro">Altro</option>
                 </select>
               </div>
             </div>
@@ -742,26 +753,6 @@
                   placeholder="es. 1968 oppure 2016"
                 />
               </div>
-            </div>
-
-            <div class="form-checkboxes">
-              <label class="checkbox-label">
-                <input
-                  type="checkbox"
-                  name="needsGelInsert"
-                  [(ngModel)]="quoteForm.needsGelInsert"
-                />
-                <span>Richiedo inserimento lastra <strong>Comfort Gel + Memory Foam</strong> (per Selle Moto)</span>
-              </label>
-
-              <label class="checkbox-label">
-                <input
-                  type="checkbox"
-                  name="needsInspection"
-                  [(ngModel)]="quoteForm.needsInspection"
-                />
-                <span>Posso passare in <strong>Via Emilia Ponente 107/A</strong> per far visionare il veicolo agli artigiani</span>
-              </label>
             </div>
 
             <div class="form-row-2">
@@ -844,8 +835,12 @@
               <div class="contact-item">
                 <div class="contact-icon">📍</div>
                 <div>
-                  <span class="item-label">INDIRIZZO LABORATORIO</span>
-                  <strong>{{ info.streetAddress }}, {{ info.postalCode }} {{ info.city }}</strong>
+                  <span class="item-label">INDIRIZZO LABORATORIO (CLICCA PER NAVIGATORE)</span>
+                  <strong>
+                    <a [href]="info.googleMapsUrl" target="_blank" rel="noopener">
+                      {{ info.streetAddress }}, {{ info.postalCode }} {{ info.city }} ↗
+                    </a>
+                  </strong>
                   <span class="item-note">Facilmente raggiungibile da Tangenziale Uscita 2 (Borgo Panigale) o da Porta Saffi / Ospedale Maggiore, con comodo accesso per carico/scarico sedili e moto.</span>
                 </div>
               </div>
@@ -882,9 +877,7 @@
                     <span class="hour-day">{{ h.days }}</span>
                     <div class="hour-slots">
                       <span>{{ h.morning }}</span>
-                      @if (h.open) {
-                        <span class="slot-sep">/</span>
-                      }
+                      <span class="slot-sep"> • </span>
                       <span>{{ h.afternoon }}</span>
                     </div>
                   </div>
@@ -958,7 +951,9 @@
     <div class="footer-col">
       <h4>Contatti &amp; Sede</h4>
       <ul class="footer-contact-list">
-        <li>📍 {{ info.streetAddress }}, {{ info.postalCode }} {{ info.city }}</li>
+        <li>
+          📍 <a [href]="info.googleMapsUrl" target="_blank" rel="noopener">{{ info.streetAddress }}, {{ info.postalCode }} {{ info.city }}</a>
+        </li>
         <li>📞 <a [href]="info.phoneHref">{{ info.phoneDisplay }}</a></li>
         <li>✉️ <a [href]="'mailto:' + info.email">{{ info.email }}</a></li>
         <li>🕒 Lun – Ven: 08:00–12:30 / 14:30–18:30</li>
