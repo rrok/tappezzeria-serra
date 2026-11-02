@@ -46,10 +46,6 @@ export class App implements OnInit {
   // Google Drive Dedicated Gallery State
   readonly galleryPhotos = signal<GalleryPhoto[]>(DEFAULT_GALLERY_PHOTOS);
   readonly galleryLoading = signal<boolean>(false);
-  readonly galleryError = signal<string>('');
-  readonly activeDriveFolderId = signal<string>('');
-  readonly driveFolderInput = signal<string>('');
-  readonly showDriveConfigPanel = signal<boolean>(false);
   readonly selectedGalleryCategory = signal<GalleryCategory>('tutti');
   readonly gallerySearchQuery = signal<string>('');
   readonly lightboxPhotoIndex = signal<number | null>(null);
@@ -66,10 +62,6 @@ export class App implements OnInit {
         photo.categoryLabel.toLowerCase().includes(query);
       return matchesCat && matchesQuery;
     });
-  });
-
-  readonly drivePhotosCount = computed(() => {
-    return this.galleryPhotos().filter((p) => p.source === 'drive').length;
   });
 
   readonly activeLightboxPhoto = computed<GalleryPhoto | null>(() => {
@@ -193,7 +185,6 @@ export class App implements OnInit {
 
   ngOnInit(): void {
     this.updateWorkshopStatus();
-    this.driveFolderInput.set(this.driveGalleryService.getConfiguredFolderInput());
     this.syncPageFromUrl();
     this.loadDriveGallery();
   }
@@ -242,29 +233,11 @@ export class App implements OnInit {
     }
   }
 
-  async loadDriveGallery(customInput?: string): Promise<void> {
+  async loadDriveGallery(): Promise<void> {
     this.galleryLoading.set(true);
-    this.galleryError.set('');
-    const result = await this.driveGalleryService.fetchDrivePhotos(customInput);
-    this.galleryPhotos.set(result.photos);
-    this.activeDriveFolderId.set(result.folderId);
-    if (result.error) {
-      this.galleryError.set(result.error);
-    }
+    const photos = await this.driveGalleryService.fetchDrivePhotos();
+    this.galleryPhotos.set(photos);
     this.galleryLoading.set(false);
-  }
-
-  async saveAndSyncDriveFolder(): Promise<void> {
-    const input = this.driveFolderInput().trim();
-    this.driveGalleryService.saveFolderInput(input);
-    await this.loadDriveGallery(input);
-    if (!this.galleryError() && this.activeDriveFolderId()) {
-      this.showDriveConfigPanel.set(false);
-    }
-  }
-
-  toggleDriveConfigPanel(): void {
-    this.showDriveConfigPanel.update((v) => !v);
   }
 
   selectGalleryCategory(cat: GalleryCategory): void {

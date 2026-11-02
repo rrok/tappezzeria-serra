@@ -16,8 +16,6 @@ export interface GalleryPhoto {
   createdAt?: string;
 }
 
-const STORAGE_KEY_FOLDER = 'tappezzeria_serra_drive_folder';
-
 export const DEFAULT_GALLERY_PHOTOS: GalleryPhoto[] = [
   {
     id: 'bottega-1',
@@ -80,26 +78,20 @@ export const DEFAULT_GALLERY_PHOTOS: GalleryPhoto[] = [
   providedIn: 'root'
 })
 export class DriveGalleryService {
-  /**
-   * Estrae l'ID della cartella Google Drive da qualsiasi formato di link o ID diretto
-   */
   extractFolderId(input: string): string {
-    if (!input) return '';
+    if (!input || input.startsWith('__')) return '';
     const trimmed = input.trim();
 
-    // Match /folders/FOLDER_ID
     const folderMatch = trimmed.match(/\/folders\/([a-zA-Z0-9_-]{10,})/);
     if (folderMatch && folderMatch[1]) {
       return folderMatch[1];
     }
 
-    // Match ?id=FOLDER_ID or &id=FOLDER_ID
     const idParamMatch = trimmed.match(/[?&]id=([a-zA-Z0-9_-]{10,})/);
     if (idParamMatch && idParamMatch[1]) {
       return idParamMatch[1];
     }
 
-    // If it's already a raw folder ID
     if (/^[a-zA-Z0-9_-]{15,}$/.test(trimmed)) {
       return trimmed;
     }
@@ -107,85 +99,34 @@ export class DriveGalleryService {
     return '';
   }
 
-  getConfiguredFolderInput(): string {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY_FOLDER);
-      if (saved && saved.trim()) {
-        return saved.trim();
-      }
-    } catch {
-      // ignore storage errors in incognito
-    }
-    return DRIVE_GALLERY_CONFIG.PUBLIC_DRIVE_FOLDER_LINK || '';
-  }
-
-  saveFolderInput(linkOrId: string): void {
-    try {
-      if (!linkOrId.trim()) {
-        localStorage.removeItem(STORAGE_KEY_FOLDER);
-      } else {
-        localStorage.setItem(STORAGE_KEY_FOLDER, linkOrId.trim());
-      }
-    } catch {
-      // ignore storage errors
-    }
-  }
-
-  /**
-   * Carica le immagini dalla cartella pubblica Google Drive
-   */
-  async fetchDrivePhotos(customLinkOrId?: string): Promise<{
-    photos: GalleryPhoto[];
-    folderId: string;
-    error?: string;
-  }> {
-    const rawInput = customLinkOrId !== undefined ? customLinkOrId : this.getConfiguredFolderInput();
-    const folderId = this.extractFolderId(rawInput);
+  async fetchDrivePhotos(): Promise<GalleryPhoto[]> {
+    const rawLink = DRIVE_GALLERY_CONFIG.PUBLIC_DRIVE_FOLDER_LINK || '';
+    const apiKey =
+      DRIVE_GALLERY_CONFIG.GOOGLE_API_KEY && !DRIVE_GALLERY_CONFIG.GOOGLE_API_KEY.startsWith('__')
+        ? DRIVE_GALLERY_CONFIG.GOOGLE_API_KEY.trim()
+        : '';
+    const folderId = this.extractFolderId(rawLink);
 
     if (!folderId) {
-      return {
-        photos: DRIVE_GALLERY_CONFIG.INCLUDE_DEFAULT_WORKSHOP_PHOTOS ? [...DEFAULT_GALLERY_PHOTOS] : [],
-        folderId: ''
-      };
+      return DRIVE_GALLERY_CONFIG.INCLUDE_DEFAULT_WORKSHOP_PHOTOS ? [...DEFAULT_GALLERY_PHOTOS] : [];
     }
 
     try {
       let driveItems: Array<{ id: string; name: string; description?: string }> = [];
 
-      // 1. Se è presente una Google API Key, usa Drive API v3 diretta
-      if (DRIVE_GALLERY_CONFIG.GOOGLE_API_KEY) {
-        driveItems = await this.fetchViaGoogleApi(folderId, DRIVE_GALLERY_CONFIG.GOOGLE_API_KEY);
+      if (apiKey) {
+        driveItems = await this.fetchViaGoogleApi(folderId, apiKey);
       } else {
-        // 2. Modalità automatica senza API Key: legge la vista pubblica embeddedfolderview di Google Drive
         driveItems = await this.fetchViaPublicEmbeddedView(folderId);
       }
 
       const drivePhotos: GalleryPhoto[] = driveItems.map((item) => this.mapDriveFileToPhoto(item));
 
-      const combined = DRIVE_GALLERY_CONFIG.INCLUDE_DEFAULT_WORKSHOP_PHOTOS
+      return DRIVE_GALLERY_CONFIG.INCLUDE_DEFAULT_WORKSHOP_PHOTOS
         ? [...drivePhotos, ...DEFAULT_GALLERY_PHOTOS]
         : drivePhotos;
-
-      if (drivePhotos.length === 0) {
-        return {
-          photos: combined,
-          folderId,
-          error:
-            'La cartella Google Drive è stata trovata ma non contiene ancora immagini visibili pubblicamente. Assicurati che la cartella abbia accesso "Chiunque abbia il link" e contenga foto (.jpg, .png, .webp).'
-        };
-      }
-
-      return {
-        photos: combined,
-        folderId
-      };
-    } catch (err: any) {
-      return {
-        photos: DRIVE_GALLERY_CONFIG.INCLUDE_DEFAULT_WORKSHOP_PHOTOS ? [...DEFAULT_GALLERY_PHOTOS] : [],
-        folderId,
-        error:
-          'Impossibile leggere la cartella Google Drive. Verifica che la cartella sia impostata su "Chiunque abbia il link (Visualizzatore)".'
-      };
+    } catch {
+      return DRIVE_GALLERY_CONFIG.INCLUDE_DEFAULT_WORKSHOP_PHOTOS ? [...DEFAULT_GALLERY_PHOTOS] : [];
     }
   }
 
@@ -203,10 +144,6 @@ export class DriveGalleryService {
     return data.files || [];
   }
 
-  /**
-   * Legge la pagina pubblica `https://drive.google.com/embeddedfolderview?id=FOLDER_ID#list`
-   * usando più proxy CORS pubblici con fallback automatico.
-   */
   private async fetchViaPublicEmbeddedView(
     folderId: string
   ): Promise<Array<{ id: string; name: string }>> {
@@ -233,12 +170,12 @@ export class DriveGalleryService {
           }
         }
       } catch {
-        // Prova il proxy successivo
+        // try next proxy
       }
     }
 
     if (!html) {
-      throw new Error('Nessuna risposta valida dalla vista pubblica di Google Drive');
+      throw new Error('Unable to fetch public Drive folder view');
     }
 
     return this.parseEmbeddedFolderHtml(html);
@@ -256,7 +193,6 @@ export class DriveGalleryService {
       const titleEl = entry.querySelector('.flip-entry-title');
       const rawName = titleEl?.textContent?.trim() || 'Lavorazione Tappezzeria Serra';
 
-      // Filtra solo file immagine (o voci con miniatura immagine)
       const isImageExt = /\.(jpe?g|png|webp|gif|avif|bmp|heic)$/i.test(rawName);
       const hasImageIcon =
         entry.innerHTML.includes('image') ||
@@ -295,7 +231,6 @@ export class DriveGalleryService {
       categoryLabel = 'Auto d’Epoca';
     }
 
-    // Rimuove eventuale prefisso di categoria dal titolo (es. "moto - Sella Guzzi" -> "Sella Guzzi")
     const formattedTitle = cleanName
       .replace(/^(epoca|cappotta|cappotte|moto|sella|cielo|moderne|arredo|nautica)\s*[-_:–]\s*/i, '')
       .replace(/[_-]+/g, ' ')
@@ -311,14 +246,14 @@ export class DriveGalleryService {
       title: finalTitle,
       caption:
         file.description ||
-        `Fotografia caricata direttamente dal laboratorio Tappezzeria Serra S.n.c. – Reparto ${categoryLabel}.`,
+        `Lavorazione artigianale eseguita presso il laboratorio Tappezzeria Serra S.n.c. – Reparto ${categoryLabel}.`,
       category,
       categoryLabel,
       imageUrl: `https://drive.google.com/thumbnail?id=${file.id}&sz=w1000`,
       fallbackUrl: `https://lh3.googleusercontent.com/d/${file.id}=w1000`,
       fullResUrl: `https://drive.google.com/thumbnail?id=${file.id}&sz=w1800`,
       source: 'drive',
-      createdAt: 'Caricato da Google Drive'
+      createdAt: 'Laboratorio Tappezzeria Serra'
     };
   }
 }

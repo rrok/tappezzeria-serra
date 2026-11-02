@@ -639,14 +639,14 @@
         }
       </div>
 
-      <!-- Callout Banner per la Pagina Galleria Fotografica Dedicata (Google Drive) -->
+      <!-- Callout Banner per la Pagina Galleria Fotografica Dedicata -->
       <div class="gallery-cta-banner stitch-frame">
         <div class="gallery-cta-copy">
-          <span class="mono-tag">ARCHIVIO FOTOGRAFICO IN TEMPO REALE</span>
+          <span class="mono-tag">ARCHIVIO FOTOGRAFICO DEL LABORATORIO</span>
           <h3>Vuoi vedere tutte le foto dei nostri lavori in laboratorio?</h3>
           <p>
-            Visita la nostra <strong>Galleria Fotografica dedicata</strong>, collegata direttamente alla cartella
-            Google Drive della bottega con le foto aggiornate di sedili d’epoca, cappotte, selle moto e cieli auto.
+            Visita la nostra <strong>Galleria Fotografica dedicata</strong> con le foto aggiornate di sedili d’epoca,
+            cappotte cabriolet, selle moto personalizzate e cieli auto realizzati in Via Emilia Ponente 107/A.
           </p>
         </div>
         <button type="button" class="btn-hero-primary" (click)="openGalleryPage()">
@@ -962,7 +962,7 @@
   </section>
   } @else {
   <!-- ==========================================
-       PAGINA DEDICATA: GALLERIA FOTOGRAFICA GOOGLE DRIVE
+       PAGINA DEDICATA: GALLERIA FOTOGRAFICA DELLA BOTTEGA
        ========================================== -->
   <section class="gallery-page-hero stitch-border-bottom">
     <div class="container">
@@ -970,96 +970,14 @@
         <button type="button" class="btn-back-home" (click)="openHomePage()">
           ← Torna alla Pagina Principale
         </button>
-
-        <div class="drive-sync-toolbar">
-          @if (activeDriveFolderId()) {
-            <span class="drive-status-badge connected">
-              <span class="status-dot"></span>
-              Google Drive Collegato ({{ drivePhotosCount() }} foto da Drive)
-            </span>
-          } @else {
-            <span class="drive-status-badge">
-              📁 Cartella Google Drive pronta da collegare
-            </span>
-          }
-          <button
-            type="button"
-            class="btn-drive-refresh"
-            (click)="loadDriveGallery()"
-            [disabled]="galleryLoading()"
-            title="Ricarica le foto dalla cartella pubblica Google Drive"
-          >
-            {{ galleryLoading() ? '⏳ Sincronizzazione...' : '↻ Aggiorna da Drive' }}
-          </button>
-          <button
-            type="button"
-            class="btn-drive-config"
-            (click)="toggleDriveConfigPanel()"
-          >
-            ⚙ {{ activeDriveFolderId() ? 'Cambia Cartella Drive' : 'Collega Cartella Google Drive' }}
-          </button>
-        </div>
       </div>
 
       <span class="section-kicker gold-kicker">ARCHIVIO LAVORI TAPPEZZERIA SERRA BOLOGNA</span>
       <h1 class="gallery-page-title">Galleria Fotografica della Bottega</h1>
       <p class="gallery-page-lead">
         Esplora i restauri di interni d’epoca, le cappotte cabriolet, le selle moto personalizzate e i cieli auto
-        realizzati in <strong>Via Emilia Ponente 107/A</strong>. Le foto caricate nella cartella pubblica
-        <strong>Google Drive</strong> compaiono automaticamente in questa pagina.
+        realizzati artigianalmente nel nostro laboratorio in <strong>Via Emilia Ponente 107/A, Bologna</strong>.
       </p>
-
-      <!-- Pannello Configurazione / Collegamento Cartella Google Drive -->
-      @if (showDriveConfigPanel()) {
-        <div class="drive-config-card stitch-frame">
-          <div class="drive-config-header">
-            <div>
-              <span class="mono-tag">SINCRONIZZAZIONE DIRETTA GOOGLE DRIVE</span>
-              <h3>Collega una Cartella Pubblica di Google Drive</h3>
-            </div>
-            <button type="button" class="btn-close-config" (click)="toggleDriveConfigPanel()">✕</button>
-          </div>
-
-          <div class="drive-steps-grid">
-            <div class="drive-step">
-              <strong>1. Crea e condividi la cartella</strong>
-              <p>Su Google Drive crea una cartella, clicca col tasto destro → <em>Condividi</em> e imposta <strong>«Chiunque abbia il link (Visualizzatore)»</strong>.</p>
-            </div>
-            <div class="drive-step">
-              <strong>2. Carica le foto dal telefono o PC</strong>
-              <p>Se inizi il nome del file con <code>epoca -</code>, <code>cappotta -</code>, <code>moto -</code> o <code>cielo -</code>, il sito assegna in automatico categoria e titolo!</p>
-            </div>
-            <div class="drive-step">
-              <strong>3. Incolla il link qui sotto</strong>
-              <p>Incolla il link della cartella qui sotto (o salvalo in <code>src/app/drive-gallery.config.ts</code> per renderlo predefinito per tutti i visitatori).</p>
-            </div>
-          </div>
-
-          <div class="drive-input-row">
-            <input
-              type="text"
-              class="drive-link-input"
-              [ngModel]="driveFolderInput()"
-              (ngModelChange)="driveFolderInput.set($event)"
-              placeholder="Incolla qui il link della cartella Google Drive (es. https://drive.google.com/drive/folders/1AbCdEf...)"
-            />
-            <button
-              type="button"
-              class="btn-primary-gold"
-              (click)="saveAndSyncDriveFolder()"
-              [disabled]="galleryLoading()"
-            >
-              {{ galleryLoading() ? 'Caricamento...' : 'Salva e Carica Foto da Drive' }}
-            </button>
-          </div>
-
-          @if (galleryError()) {
-            <div class="drive-error-banner">
-              ⚠️ {{ galleryError() }}
-            </div>
-          }
-        </div>
-      }
     </div>
   </section>
 
@@ -1132,12 +1050,12 @@
       @if (galleryLoading()) {
         <div class="gallery-loading-state">
           <div class="spinner-leather"></div>
-          <p>Sincronizzazione delle fotografie dalla cartella Google Drive in corso...</p>
+          <p>Caricamento delle fotografie del laboratorio in corso...</p>
         </div>
       } @else if (filteredGalleryPhotos().length === 0) {
         <div class="gallery-empty-state">
           <h3>Nessuna fotografia trovata per questo filtro</h3>
-          <p>Prova a selezionare «Tutte le Foto» oppure carica nuove immagini nella cartella Google Drive.</p>
+          <p>Prova a selezionare «Tutte le Foto» oppure modifica la ricerca.</p>
           <button type="button" class="btn-primary-gold" (click)="selectGalleryCategory('tutti'); gallerySearchQuery.set('')">
             Mostra tutte le foto
           </button>
@@ -1155,11 +1073,7 @@
                 />
                 <div class="gallery-photo-badges">
                   <span class="photo-cat-pill">{{ photo.categoryLabel }}</span>
-                  @if (photo.source === 'drive') {
-                    <span class="photo-drive-pill">☁ Google Drive</span>
-                  } @else {
-                    <span class="photo-bottega-pill">Bottega Bologna</span>
-                  }
+                  <span class="photo-bottega-pill">Bottega Bologna</span>
                 </div>
                 <div class="gallery-zoom-hint">
                   <span>🔍 Clicca per ingrandire</span>

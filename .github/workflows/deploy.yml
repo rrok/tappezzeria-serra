@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -30,26 +30,41 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Inject Google Drive Folder Link from GitHub Env / Secrets
+        env:
+          DRIVE_FOLDER_LINK: ${{ vars.DRIVE_FOLDER_LINK || secrets.DRIVE_FOLDER_LINK }}
+          GOOGLE_API_KEY: ${{ vars.GOOGLE_API_KEY || secrets.GOOGLE_API_KEY }}
+        run: |
+          node -e '
+            const fs = require("fs");
+            const path = "src/app/drive-gallery.config.ts";
+            let content = fs.readFileSync(path, "utf8");
+            const driveLink = (process.env.DRIVE_FOLDER_LINK || "").trim();
+            const apiKey = (process.env.GOOGLE_API_KEY || "").trim();
+            content = content.replace("__DRIVE_FOLDER_LINK__", driveLink.replace(/\\/g, "\\\\").replace(/\x27/g, "\\\x27"));
+            content = content.replace("__GOOGLE_API_KEY__", apiKey.replace(/\\/g, "\\\\").replace(/\x27/g, "\\\x27"));
+            fs.writeFileSync(path, content, "utf8");
+            console.log("Configured Drive Folder Link present:", Boolean(driveLink));
+          '
+
       - name: Build Angular App for Custom Domain (tappezzeria-serra.it)
         run: npx ng build --configuration production --base-href /
 
-      - name: Ensure CNAME and 404.html for SPA routing
+      - name: Ensure CNAME, .nojekyll and 404.html for SPA routing
         run: |
           cp dist/tappezzeria-serra/browser/index.html dist/tappezzeria-serra/browser/404.html
           echo "tappezzeria-serra.it" > dist/tappezzeria-serra/browser/CNAME
+          touch dist/tappezzeria-serra/browser/.nojekyll
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist/tappezzeria-serra/browser
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy to gh-pages branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd dist/tappezzeria-serra/browser
+          git init
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b gh-pages
+          git add -A
+          git commit -m "Deploy to GitHub Pages with Drive Gallery config"
+          git push -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
