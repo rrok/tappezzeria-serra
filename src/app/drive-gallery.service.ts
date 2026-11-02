@@ -141,7 +141,7 @@ export class DriveGalleryService {
           const existingPreload = preloadedById.get(item.id);
           mergedMap.set(item.id, {
             ...item,
-            localUrl: existingPreload?.localUrl || item.localUrl
+            localUrl: existingPreload?.localUrl
           });
         }
       }
@@ -173,25 +173,26 @@ export class DriveGalleryService {
   }
 
   private async fetchViaJinaReader(folderId: string): Promise<RawDriveFileItem[]> {
-    const url = `https://r.jina.ai/https://drive.google.com/embeddedfolderview?id=${encodeURIComponent(folderId)}`;
+    // Aggiunge _cb=timestamp per forzare r.jina.ai a leggere la cartella Drive in tempo reale senza cache
+    const cacheBuster = Date.now();
+    const url = `https://r.jina.ai/https://drive.google.com/embeddedfolderview?id=${encodeURIComponent(folderId)}&_cb=${cacheBuster}`;
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
+    const timeout = setTimeout(() => controller.abort(), 7000);
     try {
-      const res = await fetch(url, { signal: controller.signal });
+      const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
       clearTimeout(timeout);
       if (!res.ok) {
         return [];
       }
       const text = await res.text();
       const items: RawDriveFileItem[] = [];
-      const lineRegex = /\[!\[Image[^\]]*\]\((https:\/\/lh3\.googleusercontent\.com\/[^)]+)\)[^\]]*?([a-zA-Z0-9_.\-\s]+\.(?:jpe?g|png|webp|gif|avif|bmp|heic))\]\(https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]{15,})\/view/gi;
+      const lineRegex = /\)\s*([^\[\]\n\r]+?\.(?:jpe?g|png|webp|gif|avif|bmp|heic))\]\(https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]{15,})\/view/gi;
       let match: RegExpExecArray | null;
       while ((match = lineRegex.exec(text)) !== null) {
-        const signedThumb = match[1].trim().replace(/=s\d+$/, '=s1200');
-        const name = match[2].trim();
-        const id = match[3].trim();
+        const name = match[1].trim();
+        const id = match[2].trim();
         if (id && name) {
-          items.push({ id, name, localUrl: signedThumb });
+          items.push({ id, name });
         }
       }
       return items;
@@ -208,25 +209,26 @@ export class DriveGalleryService {
     let category: Exclude<GalleryCategory, 'tutti'> = 'epoca';
     let categoryLabel = 'Auto d’Epoca';
 
-    if (/(cappott|capot|spider|cabrio|sonnenland|lunotto|telo)/i.test(lower)) {
+    if (/^(cappott|capot)/i.test(lower) || /(cappott|capot|spider|cabrio|sonnenland|lunotto|telo)/i.test(lower)) {
       category = 'cappotte';
       categoryLabel = 'Cappotte & Spider';
-    } else if (/(moto|sell[ae]|scooter|t[\s_-]*max|tmax|guzzi|ducati|vespa|lambretta|bmw|harley|honda|yamaha|kawasaki|suzuki|gel)/i.test(lower)) {
+    } else if (/^(moto|sell[ae]|scooter)/i.test(lower) || /(moto|sell[ae]|scooter|t[\s_-]*max|tmax|guzzi|ducati|vespa|lambretta|bmw|harley|honda|yamaha|kawasaki|suzuki|gel)/i.test(lower)) {
       category = 'moto';
       categoryLabel = 'Selle Moto & Scooter';
-    } else if (/(ciel[oi]|imperial|scollat|audi|volkswagen|golf|volante|fianchett|modern)/i.test(lower)) {
+    } else if (/^(ciel[oi]|modern)/i.test(lower) || /(ciel[oi]|imperial|scollat|audi|volkswagen|golf|volante|fianchett|modern)/i.test(lower)) {
       category = 'moderne';
       categoryLabel = 'Cieli & Interni';
-    } else if (/(nautic|barca|gommone|poltron|divan|sedi[ae]|arred|ufficio)/i.test(lower)) {
+    } else if (/^(arred|nautic)/i.test(lower) || /(nautic|barca|gommone|poltron|divan|sedi[ae]|arred|ufficio)/i.test(lower)) {
       category = 'nautica-arredo';
       categoryLabel = 'Nautica & Arredo';
-    } else if (/(epoca|storic|alfa|lancia|fiat|ferrari|maserati|jaguar|porsche|connolly)/i.test(lower)) {
+    } else if (/^(epoca|storic)/i.test(lower) || /(epoca|storic|alfa|lancia|fiat|ferrari|maserati|jaguar|porsche|jeep|connolly)/i.test(lower)) {
       category = 'epoca';
       categoryLabel = 'Auto d’Epoca';
     }
 
+    // Rimuove prefissi di categoria come "moto-", "moto - ", "epoca-", "cappotta-", "cielo-", "arredo-"
     const withoutExplicitPrefix = cleanName
-      .replace(/^(epoca|cappotta|cappotte|moto|cielo|moderne|arredo|nautica)\s*[-:–]\s+/i, '')
+      .replace(/^(epoca|cappotta|cappotte|moto|cielo|moderne|arredo|nautica)\s*[-_:–]+\s*/i, '')
       .replace(/[_-]+/g, ' ')
       .trim();
 
@@ -250,7 +252,7 @@ export class DriveGalleryService {
       category,
       categoryLabel,
       imageUrl: primaryImage,
-      fallbackUrl: `https://lh3.googleusercontent.com/d/${file.id}=w1000`,
+      fallbackUrl: `https://drive.google.com/thumbnail?id=${file.id}&sz=w1000`,
       fullResUrl: fullImage,
       source: 'drive',
       createdAt: 'Laboratorio Tappezzeria Serra'

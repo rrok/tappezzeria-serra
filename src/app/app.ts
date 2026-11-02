@@ -97,6 +97,13 @@ export class App implements OnInit {
     this.syncPageFromUrl();
   }
 
+  @HostListener('window:focus')
+  onWindowFocus(): void {
+    if (this.activePage() === 'galleria') {
+      this.loadDriveGallery();
+    }
+  }
+
   scrollToTop(): void {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -205,6 +212,7 @@ export class App implements OnInit {
     this.selectedGalleryCategory.set(category);
     this.activePage.set('galleria');
     this.closeMobileMenu();
+    this.loadDriveGallery();
     try {
       window.history.pushState({}, '', '/galleria');
     } catch {
