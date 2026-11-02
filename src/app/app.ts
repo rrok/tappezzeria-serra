@@ -1,4 +1,4 @@
-import { Component, computed, signal, OnInit, HostListener } from '@angular/core';
+import { Component, computed, signal, OnInit, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -11,6 +11,12 @@ import {
   MaterialSwatch,
   RestorationProject
 } from './workshop.data';
+import {
+  DriveGalleryService,
+  GalleryPhoto,
+  GalleryCategory,
+  DEFAULT_GALLERY_PHOTOS
+} from './drive-gallery.service';
 
 @Component({
   selector: 'app-root',
@@ -20,11 +26,16 @@ import {
   styleUrl: './app.css'
 })
 export class App implements OnInit {
+  private readonly driveGalleryService = inject(DriveGalleryService);
+
   readonly info = WORKSHOP_INFO;
   readonly services = SERVICES_LIST;
   readonly swatches = MATERIAL_SWATCHES;
   readonly projects = RESTORATION_PROJECTS;
   readonly reviews = CUSTOMER_REVIEWS;
+
+  // Page router state: 'home' | 'galleria'
+  readonly activePage = signal<'home' | 'galleria'>('home');
 
   // Mobile menu state
   readonly mobileMenuOpen = signal(false);
@@ -32,10 +43,66 @@ export class App implements OnInit {
   // Back to top button visibility when scrolling down
   readonly showBackToTop = signal(false);
 
+  // Google Drive Dedicated Gallery State
+  readonly galleryPhotos = signal<GalleryPhoto[]>(DEFAULT_GALLERY_PHOTOS);
+  readonly galleryLoading = signal<boolean>(false);
+  readonly galleryError = signal<string>('');
+  readonly activeDriveFolderId = signal<string>('');
+  readonly driveFolderInput = signal<string>('');
+  readonly showDriveConfigPanel = signal<boolean>(false);
+  readonly selectedGalleryCategory = signal<GalleryCategory>('tutti');
+  readonly gallerySearchQuery = signal<string>('');
+  readonly lightboxPhotoIndex = signal<number | null>(null);
+
+  readonly filteredGalleryPhotos = computed(() => {
+    const cat = this.selectedGalleryCategory();
+    const query = this.gallerySearchQuery().trim().toLowerCase();
+    return this.galleryPhotos().filter((photo) => {
+      const matchesCat = cat === 'tutti' || photo.category === cat;
+      const matchesQuery =
+        !query ||
+        photo.title.toLowerCase().includes(query) ||
+        photo.caption.toLowerCase().includes(query) ||
+        photo.categoryLabel.toLowerCase().includes(query);
+      return matchesCat && matchesQuery;
+    });
+  });
+
+  readonly drivePhotosCount = computed(() => {
+    return this.galleryPhotos().filter((p) => p.source === 'drive').length;
+  });
+
+  readonly activeLightboxPhoto = computed<GalleryPhoto | null>(() => {
+    const idx = this.lightboxPhotoIndex();
+    const list = this.filteredGalleryPhotos();
+    if (idx === null || idx < 0 || idx >= list.length) {
+      return null;
+    }
+    return list[idx];
+  });
+
   @HostListener('window:scroll')
   onWindowScroll(): void {
     const scrollPos = window.scrollY || document.documentElement.scrollTop || 0;
     this.showBackToTop.set(scrollPos > 360);
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  onKeyDown(event: KeyboardEvent): void {
+    if (this.lightboxPhotoIndex() !== null) {
+      if (event.key === 'Escape') {
+        this.closeLightbox();
+      } else if (event.key === 'ArrowRight') {
+        this.nextLightboxPhoto();
+      } else if (event.key === 'ArrowLeft') {
+        this.prevLightboxPhoto();
+      }
+    }
+  }
+
+  @HostListener('window:popstate')
+  onPopState(): void {
+    this.syncPageFromUrl();
   }
 
   scrollToTop(): void {
@@ -126,6 +193,122 @@ export class App implements OnInit {
 
   ngOnInit(): void {
     this.updateWorkshopStatus();
+    this.driveFolderInput.set(this.driveGalleryService.getConfiguredFolderInput());
+    this.syncPageFromUrl();
+    this.loadDriveGallery();
+  }
+
+  private syncPageFromUrl(): void {
+    const path = window.location.pathname.toLowerCase();
+    const search = window.location.search.toLowerCase();
+    const hash = window.location.hash.toLowerCase();
+
+    if (path.endsWith('/galleria') || search.includes('page=galleria') || hash === '#galleria') {
+      this.activePage.set('galleria');
+    } else {
+      this.activePage.set('home');
+    }
+  }
+
+  openGalleryPage(category: GalleryCategory = 'tutti'): void {
+    this.selectedGalleryCategory.set(category);
+    this.activePage.set('galleria');
+    this.closeMobileMenu();
+    try {
+      window.history.pushState({}, '', '/galleria');
+    } catch {
+      // ignore history errors
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  openHomePage(sectionId?: string): void {
+    this.activePage.set('home');
+    this.closeMobileMenu();
+    try {
+      window.history.pushState({}, '', sectionId ? `/#${sectionId}` : '/');
+    } catch {
+      // ignore history errors
+    }
+    if (sectionId) {
+      setTimeout(() => {
+        const el = document.getElementById(sectionId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 60);
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  async loadDriveGallery(customInput?: string): Promise<void> {
+    this.galleryLoading.set(true);
+    this.galleryError.set('');
+    const result = await this.driveGalleryService.fetchDrivePhotos(customInput);
+    this.galleryPhotos.set(result.photos);
+    this.activeDriveFolderId.set(result.folderId);
+    if (result.error) {
+      this.galleryError.set(result.error);
+    }
+    this.galleryLoading.set(false);
+  }
+
+  async saveAndSyncDriveFolder(): Promise<void> {
+    const input = this.driveFolderInput().trim();
+    this.driveGalleryService.saveFolderInput(input);
+    await this.loadDriveGallery(input);
+    if (!this.galleryError() && this.activeDriveFolderId()) {
+      this.showDriveConfigPanel.set(false);
+    }
+  }
+
+  toggleDriveConfigPanel(): void {
+    this.showDriveConfigPanel.update((v) => !v);
+  }
+
+  selectGalleryCategory(cat: GalleryCategory): void {
+    this.selectedGalleryCategory.set(cat);
+    this.lightboxPhotoIndex.set(null);
+  }
+
+  onPhotoImgError(event: Event, photo: GalleryPhoto): void {
+    const imgEl = event.target as HTMLImageElement;
+    if (photo.fallbackUrl && imgEl.src !== photo.fallbackUrl) {
+      imgEl.src = photo.fallbackUrl;
+    } else {
+      imgEl.src = 'images/hero-workshop.jpg';
+    }
+  }
+
+  openLightbox(index: number): void {
+    this.lightboxPhotoIndex.set(index);
+  }
+
+  closeLightbox(): void {
+    this.lightboxPhotoIndex.set(null);
+  }
+
+  nextLightboxPhoto(): void {
+    const list = this.filteredGalleryPhotos();
+    const curr = this.lightboxPhotoIndex();
+    if (curr !== null && list.length > 0) {
+      this.lightboxPhotoIndex.set((curr + 1) % list.length);
+    }
+  }
+
+  prevLightboxPhoto(): void {
+    const list = this.filteredGalleryPhotos();
+    const curr = this.lightboxPhotoIndex();
+    if (curr !== null && list.length > 0) {
+      this.lightboxPhotoIndex.set((curr - 1 + list.length) % list.length);
+    }
+  }
+
+  requestQuoteFromGalleryPhoto(photo: GalleryPhoto): void {
+    this.closeLightbox();
+    this.quoteForm.notes = `Riferimento foto galleria: "${photo.title}" (${photo.categoryLabel})`;
+    this.openHomePage('preventivo');
   }
 
   updateWorkshopStatus(): void {
@@ -207,19 +390,13 @@ export class App implements OnInit {
       this.quoteForm.materialPreference = service.materials[0];
     }
     this.quoteSubmitted.set(false);
-    const el = document.getElementById('preventivo');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
+    this.openHomePage('preventivo');
   }
 
   prefillQuoteForMaterial(swatch: MaterialSwatch): void {
     this.quoteForm.materialPreference = swatch.name;
     this.quoteSubmitted.set(false);
-    const el = document.getElementById('preventivo');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
+    this.openHomePage('preventivo');
   }
 
   submitQuoteRequest(): void {

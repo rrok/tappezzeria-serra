@@ -31,7 +31,7 @@
 <!-- Main Sticky Header -->
 <header class="navbar">
   <div class="container navbar-inner">
-    <a href="#" class="brand-logo" (click)="closeMobileMenu()">
+    <a href="#" class="brand-logo" (click)="$event.preventDefault(); openHomePage()">
       <div class="brand-crest">
         <span class="crest-initials">TS</span>
         <span class="crest-stitch"></span>
@@ -43,12 +43,20 @@
     </a>
 
     <nav class="nav-links" [class.mobile-active]="mobileMenuOpen()">
-      <a href="#bottega" (click)="closeMobileMenu()">La Bottega</a>
-      <a href="#specializzazioni" (click)="closeMobileMenu()">Specializzazioni</a>
-      <a href="#campionario" (click)="closeMobileMenu()">Pelli &amp; Cappotte</a>
-      <a href="#restauri" (click)="closeMobileMenu()">Lavori &amp; Prima/Dopo</a>
-      <a href="#recensioni" (click)="closeMobileMenu()">Recensioni</a>
-      <a href="#preventivo" (click)="closeMobileMenu()" class="nav-cta-mobile">Richiedi Preventivo</a>
+      <a href="#bottega" (click)="$event.preventDefault(); openHomePage('bottega')">La Bottega</a>
+      <a href="#specializzazioni" (click)="$event.preventDefault(); openHomePage('specializzazioni')">Specializzazioni</a>
+      <a href="#campionario" (click)="$event.preventDefault(); openHomePage('campionario')">Pelli &amp; Cappotte</a>
+      <a href="#restauri" (click)="$event.preventDefault(); openHomePage('restauri')">Prima/Dopo</a>
+      <a
+        href="/galleria"
+        class="nav-gallery-pill"
+        [class.active]="activePage() === 'galleria'"
+        (click)="$event.preventDefault(); openGalleryPage()"
+      >
+        📷 Galleria Foto
+      </a>
+      <a href="#recensioni" (click)="$event.preventDefault(); openHomePage('recensioni')">Recensioni</a>
+      <a href="#preventivo" (click)="$event.preventDefault(); openHomePage('preventivo')" class="nav-cta-mobile">Richiedi Preventivo</a>
     </nav>
 
     <div class="nav-actions">
@@ -56,7 +64,7 @@
         <span class="call-icon">☎</span>
         <span>{{ info.phoneDisplay }}</span>
       </a>
-      <a href="#preventivo" class="btn-primary-gold">Preventivo &amp; Sede</a>
+      <a href="#preventivo" (click)="$event.preventDefault(); openHomePage('preventivo')" class="btn-primary-gold">Preventivo &amp; Sede</a>
       <button
         type="button"
         class="mobile-toggle"
@@ -72,6 +80,7 @@
 </header>
 
 <main>
+  @if (activePage() === 'home') {
   <!-- HERO SECTION -->
   <section class="hero-section stitch-border-bottom">
     <div class="hero-backdrop-pattern"></div>
@@ -629,6 +638,21 @@
           </div>
         }
       </div>
+
+      <!-- Callout Banner per la Pagina Galleria Fotografica Dedicata (Google Drive) -->
+      <div class="gallery-cta-banner stitch-frame">
+        <div class="gallery-cta-copy">
+          <span class="mono-tag">ARCHIVIO FOTOGRAFICO IN TEMPO REALE</span>
+          <h3>Vuoi vedere tutte le foto dei nostri lavori in laboratorio?</h3>
+          <p>
+            Visita la nostra <strong>Galleria Fotografica dedicata</strong>, collegata direttamente alla cartella
+            Google Drive della bottega con le foto aggiornate di sedili d’epoca, cappotte, selle moto e cieli auto.
+          </p>
+        </div>
+        <button type="button" class="btn-hero-primary" (click)="openGalleryPage()">
+          📷 Apri la Galleria Fotografica Completa →
+        </button>
+      </div>
     </div>
   </section>
 
@@ -936,6 +960,222 @@
       </div>
     </div>
   </section>
+  } @else {
+  <!-- ==========================================
+       PAGINA DEDICATA: GALLERIA FOTOGRAFICA GOOGLE DRIVE
+       ========================================== -->
+  <section class="gallery-page-hero stitch-border-bottom">
+    <div class="container">
+      <div class="gallery-breadcrumb-row">
+        <button type="button" class="btn-back-home" (click)="openHomePage()">
+          ← Torna alla Pagina Principale
+        </button>
+
+        <div class="drive-sync-toolbar">
+          @if (activeDriveFolderId()) {
+            <span class="drive-status-badge connected">
+              <span class="status-dot"></span>
+              Google Drive Collegato ({{ drivePhotosCount() }} foto da Drive)
+            </span>
+          } @else {
+            <span class="drive-status-badge">
+              📁 Cartella Google Drive pronta da collegare
+            </span>
+          }
+          <button
+            type="button"
+            class="btn-drive-refresh"
+            (click)="loadDriveGallery()"
+            [disabled]="galleryLoading()"
+            title="Ricarica le foto dalla cartella pubblica Google Drive"
+          >
+            {{ galleryLoading() ? '⏳ Sincronizzazione...' : '↻ Aggiorna da Drive' }}
+          </button>
+          <button
+            type="button"
+            class="btn-drive-config"
+            (click)="toggleDriveConfigPanel()"
+          >
+            ⚙ {{ activeDriveFolderId() ? 'Cambia Cartella Drive' : 'Collega Cartella Google Drive' }}
+          </button>
+        </div>
+      </div>
+
+      <span class="section-kicker gold-kicker">ARCHIVIO LAVORI TAPPEZZERIA SERRA BOLOGNA</span>
+      <h1 class="gallery-page-title">Galleria Fotografica della Bottega</h1>
+      <p class="gallery-page-lead">
+        Esplora i restauri di interni d’epoca, le cappotte cabriolet, le selle moto personalizzate e i cieli auto
+        realizzati in <strong>Via Emilia Ponente 107/A</strong>. Le foto caricate nella cartella pubblica
+        <strong>Google Drive</strong> compaiono automaticamente in questa pagina.
+      </p>
+
+      <!-- Pannello Configurazione / Collegamento Cartella Google Drive -->
+      @if (showDriveConfigPanel()) {
+        <div class="drive-config-card stitch-frame">
+          <div class="drive-config-header">
+            <div>
+              <span class="mono-tag">SINCRONIZZAZIONE DIRETTA GOOGLE DRIVE</span>
+              <h3>Collega una Cartella Pubblica di Google Drive</h3>
+            </div>
+            <button type="button" class="btn-close-config" (click)="toggleDriveConfigPanel()">✕</button>
+          </div>
+
+          <div class="drive-steps-grid">
+            <div class="drive-step">
+              <strong>1. Crea e condividi la cartella</strong>
+              <p>Su Google Drive crea una cartella, clicca col tasto destro → <em>Condividi</em> e imposta <strong>«Chiunque abbia il link (Visualizzatore)»</strong>.</p>
+            </div>
+            <div class="drive-step">
+              <strong>2. Carica le foto dal telefono o PC</strong>
+              <p>Se inizi il nome del file con <code>epoca -</code>, <code>cappotta -</code>, <code>moto -</code> o <code>cielo -</code>, il sito assegna in automatico categoria e titolo!</p>
+            </div>
+            <div class="drive-step">
+              <strong>3. Incolla il link qui sotto</strong>
+              <p>Incolla il link della cartella qui sotto (o salvalo in <code>src/app/drive-gallery.config.ts</code> per renderlo predefinito per tutti i visitatori).</p>
+            </div>
+          </div>
+
+          <div class="drive-input-row">
+            <input
+              type="text"
+              class="drive-link-input"
+              [ngModel]="driveFolderInput()"
+              (ngModelChange)="driveFolderInput.set($event)"
+              placeholder="Incolla qui il link della cartella Google Drive (es. https://drive.google.com/drive/folders/1AbCdEf...)"
+            />
+            <button
+              type="button"
+              class="btn-primary-gold"
+              (click)="saveAndSyncDriveFolder()"
+              [disabled]="galleryLoading()"
+            >
+              {{ galleryLoading() ? 'Caricamento...' : 'Salva e Carica Foto da Drive' }}
+            </button>
+          </div>
+
+          @if (galleryError()) {
+            <div class="drive-error-banner">
+              ⚠️ {{ galleryError() }}
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- CONTENUTO PRINCIPALE GALLERIA -->
+  <section class="gallery-page-content">
+    <div class="container">
+      <!-- Barra Filtri e Ricerca -->
+      <div class="gallery-controls-bar">
+        <div class="filter-pills gallery-pills">
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="selectedGalleryCategory() === 'tutti'"
+            (click)="selectGalleryCategory('tutti')"
+          >
+            Tutte le Foto ({{ galleryPhotos().length }})
+          </button>
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="selectedGalleryCategory() === 'epoca'"
+            (click)="selectGalleryCategory('epoca')"
+          >
+            Auto d’Epoca
+          </button>
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="selectedGalleryCategory() === 'cappotte'"
+            (click)="selectGalleryCategory('cappotte')"
+          >
+            Cappotte &amp; Spider
+          </button>
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="selectedGalleryCategory() === 'moto'"
+            (click)="selectGalleryCategory('moto')"
+          >
+            Selle Moto &amp; Scooter
+          </button>
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="selectedGalleryCategory() === 'moderne'"
+            (click)="selectGalleryCategory('moderne')"
+          >
+            Cieli &amp; Interni
+          </button>
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="selectedGalleryCategory() === 'nautica-arredo'"
+            (click)="selectGalleryCategory('nautica-arredo')"
+          >
+            Nautica &amp; Arredo
+          </button>
+        </div>
+
+        <div class="gallery-search-box">
+          <input
+            type="search"
+            [ngModel]="gallerySearchQuery()"
+            (ngModelChange)="gallerySearchQuery.set($event)"
+            placeholder="🔍 Cerca foto per modello, materiale o lavoro..."
+          />
+        </div>
+      </div>
+
+      @if (galleryLoading()) {
+        <div class="gallery-loading-state">
+          <div class="spinner-leather"></div>
+          <p>Sincronizzazione delle fotografie dalla cartella Google Drive in corso...</p>
+        </div>
+      } @else if (filteredGalleryPhotos().length === 0) {
+        <div class="gallery-empty-state">
+          <h3>Nessuna fotografia trovata per questo filtro</h3>
+          <p>Prova a selezionare «Tutte le Foto» oppure carica nuove immagini nella cartella Google Drive.</p>
+          <button type="button" class="btn-primary-gold" (click)="selectGalleryCategory('tutti'); gallerySearchQuery.set('')">
+            Mostra tutte le foto
+          </button>
+        </div>
+      } @else {
+        <div class="dedicated-gallery-grid">
+          @for (photo of filteredGalleryPhotos(); track photo.id; let idx = $index) {
+            <article class="gallery-photo-card" (click)="openLightbox(idx)">
+              <div class="gallery-photo-img-wrap">
+                <img
+                  [src]="photo.imageUrl"
+                  [alt]="photo.title"
+                  loading="lazy"
+                  (error)="onPhotoImgError($event, photo)"
+                />
+                <div class="gallery-photo-badges">
+                  <span class="photo-cat-pill">{{ photo.categoryLabel }}</span>
+                  @if (photo.source === 'drive') {
+                    <span class="photo-drive-pill">☁ Google Drive</span>
+                  } @else {
+                    <span class="photo-bottega-pill">Bottega Bologna</span>
+                  }
+                </div>
+                <div class="gallery-zoom-hint">
+                  <span>🔍 Clicca per ingrandire</span>
+                </div>
+              </div>
+              <div class="gallery-photo-caption-box">
+                <h3>{{ photo.title }}</h3>
+                <p>{{ photo.caption }}</p>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </div>
+  </section>
+  }
 </main>
 
 <!-- FOOTER STORICO -->
@@ -1032,6 +1272,39 @@
             </a>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- LIGHTBOX FOTO GALLERIA GOOGLE DRIVE -->
+@if (activeLightboxPhoto(); as lbPhoto) {
+  <div class="modal-backdrop" (click)="closeLightbox()">
+    <div class="lightbox-dialog stitch-frame" (click)="$event.stopPropagation()">
+      <button type="button" class="modal-close" (click)="closeLightbox()" aria-label="Chiudi foto">✕</button>
+
+      <div class="lightbox-media-stage">
+        <button type="button" class="lightbox-nav prev" (click)="prevLightboxPhoto()" aria-label="Foto precedente">‹</button>
+        <img
+          [src]="lbPhoto.fullResUrl"
+          [alt]="lbPhoto.title"
+          (error)="onPhotoImgError($event, lbPhoto)"
+        />
+        <button type="button" class="lightbox-nav next" (click)="nextLightboxPhoto()" aria-label="Foto successiva">›</button>
+      </div>
+
+      <div class="lightbox-footer-bar">
+        <div class="lightbox-info">
+          <div class="lightbox-tags">
+            <span class="mono-tag">{{ lbPhoto.categoryLabel }}</span>
+            <span class="lightbox-source-tag">{{ lbPhoto.createdAt }}</span>
+          </div>
+          <h3>{{ lbPhoto.title }}</h3>
+          <p>{{ lbPhoto.caption }}</p>
+        </div>
+        <button type="button" class="btn-primary-gold" (click)="requestQuoteFromGalleryPhoto(lbPhoto)">
+          Richiedi un lavoro simile →
+        </button>
       </div>
     </div>
   </div>

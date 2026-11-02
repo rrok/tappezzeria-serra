@@ -198,6 +198,25 @@
   color: var(--brass-light);
 }
 
+.nav-gallery-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 13px;
+  border-radius: 99px;
+  background: rgba(201, 166, 107, 0.14);
+  border: 1px solid rgba(201, 166, 107, 0.4);
+  color: var(--brass-light) !important;
+  font-weight: 600 !important;
+}
+
+.nav-gallery-pill.active,
+.nav-gallery-pill:hover {
+  background: var(--cognac);
+  border-color: var(--brass-light);
+  color: #FFF9F0 !important;
+}
+
 .nav-cta-mobile {
   display: none;
 }
@@ -1597,6 +1616,469 @@
   color: #FFF;
 }
 
+.gallery-cta-banner {
+  margin-top: 38px;
+  background: linear-gradient(135deg, #1A1411 0%, #2B1F18 100%);
+  color: var(--text-light);
+  border-radius: var(--radius-md);
+  padding: 32px 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+  box-shadow: var(--shadow-soft);
+}
+
+.gallery-cta-copy h3 {
+  font-family: var(--font-serif);
+  font-size: 1.8rem;
+  color: #FFF8F0;
+  margin-bottom: 6px;
+}
+
+.gallery-cta-copy p {
+  font-size: 0.92rem;
+  color: #D6C9BC;
+  max-width: 680px;
+}
+
+/* ==========================================
+   PAGINA DEDICATA: GALLERIA GOOGLE DRIVE
+   ========================================== */
+.gallery-page-hero {
+  background: radial-gradient(circle at 80% 20%, #2C1E16 0%, #14100D 70%);
+  color: var(--text-light);
+  padding: 44px 0 52px;
+}
+
+.gallery-breadcrumb-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.btn-back-home {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(201, 166, 107, 0.4);
+  color: var(--brass-light);
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.86rem;
+}
+
+.btn-back-home:hover {
+  background: rgba(201, 166, 107, 0.18);
+}
+
+.drive-sync-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.drive-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 0.78rem;
+  color: #DFD4C8;
+}
+
+.drive-status-badge.connected {
+  background: rgba(46, 160, 67, 0.16);
+  border-color: rgba(46, 160, 67, 0.45);
+  color: #7EE787;
+}
+
+.btn-drive-refresh,
+.btn-drive-config {
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: 1px solid rgba(201, 166, 107, 0.45);
+  background: rgba(201, 166, 107, 0.14);
+  color: var(--brass-light);
+}
+
+.btn-drive-config {
+  background: var(--cognac);
+  color: #FFF9F0;
+  border-color: var(--brass-light);
+}
+
+.gallery-page-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2.2rem, 4vw, 3.3rem);
+  color: #FFF9F2;
+  margin-bottom: 10px;
+}
+
+.gallery-page-lead {
+  font-size: 1.02rem;
+  color: #D5C8BA;
+  max-width: 780px;
+  line-height: 1.65;
+}
+
+.drive-config-card {
+  margin-top: 28px;
+  background: #221A15;
+  border: 1.5px solid var(--brass);
+  border-radius: var(--radius-md);
+  padding: 26px 28px;
+  box-shadow: var(--shadow-deep);
+}
+
+.drive-config-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.drive-config-header h3 {
+  font-family: var(--font-serif);
+  font-size: 1.6rem;
+  color: #FFF8F0;
+}
+
+.btn-close-config {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: #FFF;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.drive-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.drive-step {
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(201, 166, 107, 0.22);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.drive-step strong {
+  display: block;
+  color: var(--brass-light);
+  font-size: 0.88rem;
+  margin-bottom: 4px;
+}
+
+.drive-step p {
+  font-size: 0.8rem;
+  color: #D2C5B8;
+  line-height: 1.5;
+}
+
+.drive-step code {
+  color: #FFD7B5;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.drive-input-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.drive-link-input {
+  flex: 1;
+  min-width: 240px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--brass);
+  background: #14100D;
+  color: #FFF9F0;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+.drive-error-banner {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: rgba(124, 35, 38, 0.35);
+  border: 1px solid #D96B6E;
+  color: #FFE2E2;
+  font-size: 0.85rem;
+}
+
+.gallery-page-content {
+  padding: 56px 0 84px;
+  background: var(--bg-parchment);
+  min-height: 60vh;
+}
+
+.gallery-controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-bottom: 36px;
+}
+
+.gallery-pills {
+  margin-top: 0;
+  justify-content: flex-start;
+}
+
+.gallery-search-box {
+  min-width: 280px;
+  flex: 0 1 340px;
+}
+
+.gallery-search-box input {
+  width: 100%;
+  padding: 11px 16px;
+  border-radius: 99px;
+  border: 1px solid #CBBBA4;
+  background: #FFFFFF;
+  font-size: 0.88rem;
+  color: var(--text-dark);
+}
+
+.dedicated-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 26px;
+}
+
+.gallery-photo-card {
+  background: #FFFFFF;
+  border-radius: var(--radius-md);
+  border: 1px solid #E2D7C5;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.gallery-photo-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 38px -10px rgba(18, 15, 13, 0.24);
+}
+
+.gallery-photo-img-wrap {
+  position: relative;
+  height: 260px;
+  background: #181310;
+  overflow: hidden;
+}
+
+.gallery-photo-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.35s ease;
+}
+
+.gallery-photo-card:hover .gallery-photo-img-wrap img {
+  transform: scale(1.04);
+}
+
+.gallery-photo-badges {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.photo-cat-pill,
+.photo-drive-pill,
+.photo-bottega-pill {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.photo-cat-pill {
+  background: rgba(18, 15, 13, 0.86);
+  color: #FFF;
+}
+
+.photo-drive-pill {
+  background: rgba(31, 68, 53, 0.92);
+  color: #A7F3D0;
+  border: 1px solid rgba(167, 243, 208, 0.35);
+}
+
+.photo-bottega-pill {
+  background: rgba(184, 100, 45, 0.9);
+  color: #FFF8F0;
+}
+
+.gallery-zoom-hint {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(18, 14, 11, 0.82);
+  color: var(--brass-light);
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 0.74rem;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.gallery-photo-card:hover .gallery-zoom-hint {
+  opacity: 1;
+}
+
+.gallery-photo-caption-box {
+  padding: 18px 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.gallery-photo-caption-box h3 {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  color: var(--text-dark);
+  margin-bottom: 6px;
+}
+
+.gallery-photo-caption-box p {
+  font-size: 0.85rem;
+  color: var(--text-muted-dark);
+  line-height: 1.5;
+}
+
+.gallery-loading-state,
+.gallery-empty-state {
+  text-align: center;
+  padding: 64px 20px;
+  background: #FFFFFF;
+  border-radius: var(--radius-md);
+  border: 1px dashed #CBBBA4;
+}
+
+.spinner-leather {
+  width: 42px;
+  height: 42px;
+  border: 3px solid #E5D9C5;
+  border-top-color: var(--cognac);
+  border-radius: 50%;
+  margin: 0 auto 14px;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Lightbox Dialog */
+.lightbox-dialog {
+  position: relative;
+  background: #16120F;
+  color: var(--text-light);
+  max-width: 1020px;
+  width: 100%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 2px solid var(--brass);
+  box-shadow: var(--shadow-deep);
+}
+
+.lightbox-media-stage {
+  position: relative;
+  background: #0B0908;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 360px;
+  max-height: 68vh;
+}
+
+.lightbox-media-stage img {
+  max-width: 100%;
+  max-height: 68vh;
+  object-fit: contain;
+  display: block;
+}
+
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(20, 16, 13, 0.85);
+  border: 1px solid var(--brass);
+  color: var(--brass-light);
+  font-size: 1.8rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox-nav.prev { left: 16px; }
+.lightbox-nav.next { right: 16px; }
+
+.lightbox-footer-bar {
+  padding: 22px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  border-top: 1px solid rgba(201, 166, 107, 0.25);
+}
+
+.lightbox-tags {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.lightbox-source-tag {
+  font-size: 0.75rem;
+  color: var(--text-muted-light);
+}
+
+.lightbox-info h3 {
+  font-family: var(--font-serif);
+  font-size: 1.6rem;
+  color: #FFF8F0;
+}
+
+.lightbox-info p {
+  font-size: 0.88rem;
+  color: #C9BEB2;
+}
+
 /* ==========================================
    RECENSIONI VERIFICATE BOLOGNA
    ========================================== */
@@ -2362,7 +2844,9 @@
 
   .portfolio-grid,
   .reviews-grid,
-  .footer-grid {
+  .footer-grid,
+  .dedicated-gallery-grid,
+  .drive-steps-grid {
     grid-template-columns: minmax(0, 1fr);
   }
 }
