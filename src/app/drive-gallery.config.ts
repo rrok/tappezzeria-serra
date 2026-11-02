@@ -15,14 +15,8 @@ export const DRIVE_GALLERY_CONFIG: {
   INCLUDE_DEFAULT_WORKSHOP_PHOTOS: boolean;
   PRELOADED_DRIVE_ITEMS: RawDriveFileItem[];
 } = {
-  PUBLIC_DRIVE_FOLDER_LINK: "https://drive.google.com/drive/folders/1edR2VAPvGmHjrV7EayQMBtl0LArqIi38",
+  PUBLIC_DRIVE_FOLDER_LINK: "",
   GOOGLE_API_KEY: "",
   INCLUDE_DEFAULT_WORKSHOP_PHOTOS: true,
-  PRELOADED_DRIVE_ITEMS: [
-  {
-    "id": "1D2qLc-qrqQDpLOpqeeJv9EjLbi8WuZHF",
-    "name": "sella-t-max.jpeg",
-    "localUrl": "drive-photos/1D2qLc-qrqQDpLOpqeeJv9EjLbi8WuZHF.jpg"
-  }
-]
+  PRELOADED_DRIVE_ITEMS: []
 };
