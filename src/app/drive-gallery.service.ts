@@ -121,23 +121,28 @@ export class DriveGalleryService {
       return this.getInitialPhotos();
     }
 
-    // Se abbiamo una Google API Key ufficiale usiamo l'endpoint ufficiale Google Drive v3 (senza proxy CORS).
-    // Altrimenti usiamo direttamente le foto sincronizzate in fase di build da GitHub Actions (0ms, zero errori di rete).
-    if (!apiKey && preloadedItems.length > 0) {
-      return this.getInitialPhotos();
-    }
-
     try {
       let liveItems: RawDriveFileItem[] = [];
 
       if (apiKey) {
         liveItems = await this.fetchViaGoogleApi(folderId, apiKey);
+      } else {
+        liveItems = await this.fetchViaJinaReader(folderId);
+      }
+
+      const preloadedById = new Map<string, RawDriveFileItem>();
+      for (const p of preloadedItems) {
+        if (p && p.id) preloadedById.set(p.id, p);
       }
 
       const mergedMap = new Map<string, RawDriveFileItem>();
-      for (const item of [...preloadedItems, ...liveItems]) {
+      for (const item of [...liveItems, ...preloadedItems]) {
         if (item && item.id && !mergedMap.has(item.id)) {
-          mergedMap.set(item.id, item);
+          const existingPreload = preloadedById.get(item.id);
+          mergedMap.set(item.id, {
+            ...item,
+            localUrl: existingPreload?.localUrl || item.localUrl
+          });
         }
       }
 
@@ -165,6 +170,35 @@ export class DriveGalleryService {
     }
     const data = await res.json();
     return data.files || [];
+  }
+
+  private async fetchViaJinaReader(folderId: string): Promise<RawDriveFileItem[]> {
+    const url = `https://r.jina.ai/https://drive.google.com/embeddedfolderview?id=${encodeURIComponent(folderId)}`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    try {
+      const res = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeout);
+      if (!res.ok) {
+        return [];
+      }
+      const text = await res.text();
+      const items: RawDriveFileItem[] = [];
+      const lineRegex = /\[!\[Image[^\]]*\]\((https:\/\/lh3\.googleusercontent\.com\/[^)]+)\)[^\]]*?([a-zA-Z0-9_.\-\s]+\.(?:jpe?g|png|webp|gif|avif|bmp|heic))\]\(https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]{15,})\/view/gi;
+      let match: RegExpExecArray | null;
+      while ((match = lineRegex.exec(text)) !== null) {
+        const signedThumb = match[1].trim().replace(/=s\d+$/, '=s1200');
+        const name = match[2].trim();
+        const id = match[3].trim();
+        if (id && name) {
+          items.push({ id, name, localUrl: signedThumb });
+        }
+      }
+      return items;
+    } catch {
+      clearTimeout(timeout);
+      return [];
+    }
   }
 
   private mapDriveFileToPhoto(file: RawDriveFileItem): GalleryPhoto {
@@ -216,7 +250,7 @@ export class DriveGalleryService {
       category,
       categoryLabel,
       imageUrl: primaryImage,
-      fallbackUrl: `https://drive.google.com/thumbnail?id=${file.id}&sz=w1000`,
+      fallbackUrl: `https://lh3.googleusercontent.com/d/${file.id}=w1000`,
       fullResUrl: fullImage,
       source: 'drive',
       createdAt: 'Laboratorio Tappezzeria Serra'

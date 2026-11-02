@@ -4,6 +4,8 @@ on:
   push:
     branches: ["main"]
   workflow_dispatch:
+  schedule:
+    - cron: "*/30 * * * *"
 
 permissions:
   contents: write
@@ -30,22 +32,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Inject Google Drive Folder Link from GitHub Env / Secrets
+      - name: Sync Google Drive Folder & Inject Config
         env:
           DRIVE_FOLDER_LINK: ${{ vars.DRIVE_FOLDER_LINK || secrets.DRIVE_FOLDER_LINK }}
           GOOGLE_API_KEY: ${{ vars.GOOGLE_API_KEY || secrets.GOOGLE_API_KEY }}
-        run: |
-          node -e '
-            const fs = require("fs");
-            const path = "src/app/drive-gallery.config.ts";
-            let content = fs.readFileSync(path, "utf8");
-            const driveLink = (process.env.DRIVE_FOLDER_LINK || "").trim();
-            const apiKey = (process.env.GOOGLE_API_KEY || "").trim();
-            content = content.replace("__DRIVE_FOLDER_LINK__", driveLink.replace(/\\/g, "\\\\").replace(/\x27/g, "\\\x27"));
-            content = content.replace("__GOOGLE_API_KEY__", apiKey.replace(/\\/g, "\\\\").replace(/\x27/g, "\\\x27"));
-            fs.writeFileSync(path, content, "utf8");
-            console.log("Configured Drive Folder Link present:", Boolean(driveLink));
-          '
+        run: node scripts/sync-drive-gallery.mjs
 
       - name: Build Angular App for Custom Domain (tappezzeria-serra.it)
         run: npx ng build --configuration production --base-href /
@@ -66,5 +57,5 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b gh-pages
           git add -A
-          git commit -m "Deploy to GitHub Pages with Drive Gallery config"
+          git commit -m "Deploy to GitHub Pages with synced Drive Gallery photos"
           git push -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
