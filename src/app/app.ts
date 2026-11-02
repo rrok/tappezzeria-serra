@@ -44,7 +44,7 @@ export class App implements OnInit {
   readonly showBackToTop = signal(false);
 
   // Google Drive Dedicated Gallery State
-  readonly galleryPhotos = signal<GalleryPhoto[]>(DEFAULT_GALLERY_PHOTOS);
+  readonly galleryPhotos = signal<GalleryPhoto[]>(this.driveGalleryService.getInitialPhotos());
   readonly galleryLoading = signal<boolean>(false);
   readonly selectedGalleryCategory = signal<GalleryCategory>('tutti');
   readonly gallerySearchQuery = signal<string>('');
@@ -234,7 +234,10 @@ export class App implements OnInit {
   }
 
   async loadDriveGallery(): Promise<void> {
-    this.galleryLoading.set(true);
+    const initial = this.driveGalleryService.getInitialPhotos();
+    if (initial.length === 0) {
+      this.galleryLoading.set(true);
+    }
     const photos = await this.driveGalleryService.fetchDrivePhotos();
     this.galleryPhotos.set(photos);
     this.galleryLoading.set(false);

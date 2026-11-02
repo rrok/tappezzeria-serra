@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { DRIVE_GALLERY_CONFIG } from './drive-gallery.config';
+import { DRIVE_GALLERY_CONFIG, RawDriveFileItem } from './drive-gallery.config';
 
 export type GalleryCategory = 'tutti' | 'epoca' | 'cappotte' | 'moto' | 'moderne' | 'nautica-arredo';
 
@@ -99,6 +99,15 @@ export class DriveGalleryService {
     return '';
   }
 
+  getInitialPhotos(): GalleryPhoto[] {
+    const preloaded = (DRIVE_GALLERY_CONFIG.PRELOADED_DRIVE_ITEMS || []).map((item) =>
+      this.mapDriveFileToPhoto(item)
+    );
+    return DRIVE_GALLERY_CONFIG.INCLUDE_DEFAULT_WORKSHOP_PHOTOS
+      ? [...preloaded, ...DEFAULT_GALLERY_PHOTOS]
+      : preloaded;
+  }
+
   async fetchDrivePhotos(): Promise<GalleryPhoto[]> {
     const rawLink = DRIVE_GALLERY_CONFIG.PUBLIC_DRIVE_FOLDER_LINK || '';
     const apiKey =
@@ -106,34 +115,48 @@ export class DriveGalleryService {
         ? DRIVE_GALLERY_CONFIG.GOOGLE_API_KEY.trim()
         : '';
     const folderId = this.extractFolderId(rawLink);
+    const preloadedItems: RawDriveFileItem[] = DRIVE_GALLERY_CONFIG.PRELOADED_DRIVE_ITEMS || [];
 
     if (!folderId) {
-      return DRIVE_GALLERY_CONFIG.INCLUDE_DEFAULT_WORKSHOP_PHOTOS ? [...DEFAULT_GALLERY_PHOTOS] : [];
+      return this.getInitialPhotos();
+    }
+
+    // Se abbiamo una Google API Key ufficiale usiamo l'endpoint ufficiale Google Drive v3 (senza proxy CORS).
+    // Altrimenti usiamo direttamente le foto sincronizzate in fase di build da GitHub Actions (0ms, zero errori di rete).
+    if (!apiKey && preloadedItems.length > 0) {
+      return this.getInitialPhotos();
     }
 
     try {
-      let driveItems: Array<{ id: string; name: string; description?: string }> = [];
+      let liveItems: RawDriveFileItem[] = [];
 
       if (apiKey) {
-        driveItems = await this.fetchViaGoogleApi(folderId, apiKey);
-      } else {
-        driveItems = await this.fetchViaPublicEmbeddedView(folderId);
+        liveItems = await this.fetchViaGoogleApi(folderId, apiKey);
       }
 
-      const drivePhotos: GalleryPhoto[] = driveItems.map((item) => this.mapDriveFileToPhoto(item));
+      const mergedMap = new Map<string, RawDriveFileItem>();
+      for (const item of [...preloadedItems, ...liveItems]) {
+        if (item && item.id && !mergedMap.has(item.id)) {
+          mergedMap.set(item.id, item);
+        }
+      }
+
+      const drivePhotos: GalleryPhoto[] = Array.from(mergedMap.values()).map((item) =>
+        this.mapDriveFileToPhoto(item)
+      );
 
       return DRIVE_GALLERY_CONFIG.INCLUDE_DEFAULT_WORKSHOP_PHOTOS
         ? [...drivePhotos, ...DEFAULT_GALLERY_PHOTOS]
         : drivePhotos;
     } catch {
-      return DRIVE_GALLERY_CONFIG.INCLUDE_DEFAULT_WORKSHOP_PHOTOS ? [...DEFAULT_GALLERY_PHOTOS] : [];
+      return this.getInitialPhotos();
     }
   }
 
   private async fetchViaGoogleApi(
     folderId: string,
     apiKey: string
-  ): Promise<Array<{ id: string; name: string; description?: string }>> {
+  ): Promise<RawDriveFileItem[]> {
     const q = encodeURIComponent(`'${folderId}' in parents and mimeType contains 'image/' and trashed = false`);
     const url = `https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name,description,createdTime)&orderBy=createdTime desc&pageSize=100&key=${apiKey}`;
     const res = await fetch(url);
@@ -144,70 +167,7 @@ export class DriveGalleryService {
     return data.files || [];
   }
 
-  private async fetchViaPublicEmbeddedView(
-    folderId: string
-  ): Promise<Array<{ id: string; name: string }>> {
-    const targetUrl = `https://drive.google.com/embeddedfolderview?id=${encodeURIComponent(folderId)}#list`;
-
-    const proxyUrls = [
-      `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
-      `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`,
-      `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
-    ];
-
-    let html = '';
-    for (const proxyUrl of proxyUrls) {
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 8000);
-        const response = await fetch(proxyUrl, { signal: controller.signal });
-        clearTimeout(timeout);
-        if (response.ok) {
-          const text = await response.text();
-          if (text && (text.includes('flip-entry') || text.includes('flip-entries'))) {
-            html = text;
-            break;
-          }
-        }
-      } catch {
-        // try next proxy
-      }
-    }
-
-    if (!html) {
-      throw new Error('Unable to fetch public Drive folder view');
-    }
-
-    return this.parseEmbeddedFolderHtml(html);
-  }
-
-  private parseEmbeddedFolderHtml(html: string): Array<{ id: string; name: string }> {
-    const results: Array<{ id: string; name: string }> = [];
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-    const entries = doc.querySelectorAll('.flip-entry');
-
-    entries.forEach((entry) => {
-      const entryIdAttr = entry.getAttribute('id') || '';
-      const fileId = entryIdAttr.replace(/^entry-/, '').trim();
-      const titleEl = entry.querySelector('.flip-entry-title');
-      const rawName = titleEl?.textContent?.trim() || 'Lavorazione Tappezzeria Serra';
-
-      const isImageExt = /\.(jpe?g|png|webp|gif|avif|bmp|heic)$/i.test(rawName);
-      const hasImageIcon =
-        entry.innerHTML.includes('image') ||
-        entry.innerHTML.includes('photo') ||
-        entry.querySelector('img') !== null;
-
-      if (fileId && (isImageExt || hasImageIcon)) {
-        results.push({ id: fileId, name: rawName });
-      }
-    });
-
-    return results;
-  }
-
-  private mapDriveFileToPhoto(file: { id: string; name: string; description?: string }): GalleryPhoto {
+  private mapDriveFileToPhoto(file: RawDriveFileItem): GalleryPhoto {
     const cleanName = file.name.replace(/\.(jpe?g|png|webp|gif|avif|bmp|heic)$/i, '').trim();
     const lower = cleanName.toLowerCase();
 
@@ -217,7 +177,7 @@ export class DriveGalleryService {
     if (/(cappott|capot|spider|cabrio|sonnenland|lunotto|telo)/i.test(lower)) {
       category = 'cappotte';
       categoryLabel = 'Cappotte & Spider';
-    } else if (/(moto|sell[ae]|scooter|guzzi|ducati|vespa|lambretta|bmw|harley|gel)/i.test(lower)) {
+    } else if (/(moto|sell[ae]|scooter|t[\s_-]*max|tmax|guzzi|ducati|vespa|lambretta|bmw|harley|honda|yamaha|kawasaki|suzuki|gel)/i.test(lower)) {
       category = 'moto';
       categoryLabel = 'Selle Moto & Scooter';
     } else if (/(ciel[oi]|imperial|scollat|audi|volkswagen|golf|volante|fianchett|modern)/i.test(lower)) {
@@ -231,15 +191,21 @@ export class DriveGalleryService {
       categoryLabel = 'Auto d’Epoca';
     }
 
-    const formattedTitle = cleanName
-      .replace(/^(epoca|cappotta|cappotte|moto|sella|cielo|moderne|arredo|nautica)\s*[-_:–]\s*/i, '')
+    const withoutExplicitPrefix = cleanName
+      .replace(/^(epoca|cappotta|cappotte|moto|cielo|moderne|arredo|nautica)\s*[-:–]\s+/i, '')
       .replace(/[_-]+/g, ' ')
       .trim();
 
     const finalTitle =
-      formattedTitle.length > 0
-        ? formattedTitle.charAt(0).toUpperCase() + formattedTitle.slice(1)
+      withoutExplicitPrefix.length > 0
+        ? withoutExplicitPrefix
+            .split(/\s+/)
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ')
         : 'Lavorazione Artigianale Tappezzeria Serra';
+
+    const primaryImage = file.localUrl || `https://lh3.googleusercontent.com/d/${file.id}=w1000`;
+    const fullImage = file.localUrl || `https://lh3.googleusercontent.com/d/${file.id}=w1800`;
 
     return {
       id: `drive-${file.id}`,
@@ -249,9 +215,9 @@ export class DriveGalleryService {
         `Lavorazione artigianale eseguita presso il laboratorio Tappezzeria Serra S.n.c. – Reparto ${categoryLabel}.`,
       category,
       categoryLabel,
-      imageUrl: `https://drive.google.com/thumbnail?id=${file.id}&sz=w1000`,
-      fallbackUrl: `https://lh3.googleusercontent.com/d/${file.id}=w1000`,
-      fullResUrl: `https://drive.google.com/thumbnail?id=${file.id}&sz=w1800`,
+      imageUrl: primaryImage,
+      fallbackUrl: `https://drive.google.com/thumbnail?id=${file.id}&sz=w1000`,
+      fullResUrl: fullImage,
       source: 'drive',
       createdAt: 'Laboratorio Tappezzeria Serra'
     };

@@ -46,7 +46,6 @@
       <a href="#bottega" (click)="$event.preventDefault(); openHomePage('bottega')">La Bottega</a>
       <a href="#specializzazioni" (click)="$event.preventDefault(); openHomePage('specializzazioni')">Specializzazioni</a>
       <a href="#campionario" (click)="$event.preventDefault(); openHomePage('campionario')">Pelli &amp; Cappotte</a>
-      <a href="#restauri" (click)="$event.preventDefault(); openHomePage('restauri')">Prima/Dopo</a>
       <a
         href="/galleria"
         class="nav-gallery-pill"
@@ -513,134 +512,11 @@
     </div>
   </section>
 
-  <!-- GALLERIA LAVORI & PRIMA / DOPO INTERATTIVO -->
-  <section id="restauri" class="section-portfolio">
+  <!-- CALLOUT GALLERIA FOTOGRAFICA DEDICATA -->
+  <section class="section-portfolio">
     <div class="container">
-      <div class="section-header-center">
-        <span class="section-kicker">PORTFOLIO LAVORAZIONI A BOLOGNA</span>
-        <h2 class="section-heading">I Nostri Restauri: Confronta Prima e Dopo</h2>
-        <p class="section-subtitle">
-          Ogni progetto racconta una sfida artigianale vinta: da cappotte strappate dal tempo a sedili d’epoca
-          completamente ricostruiti, fino a cieli auto scollati riportati «pari al nuovo».
-        </p>
-
-        <div class="filter-pills">
-          <button
-            type="button"
-            class="filter-pill"
-            [class.active]="selectedProjectCategory() === 'tutti'"
-            (click)="selectProjectFilter('tutti')"
-          >
-            Tutti i Lavori
-          </button>
-          <button
-            type="button"
-            class="filter-pill"
-            [class.active]="selectedProjectCategory() === 'cappotte'"
-            (click)="selectProjectFilter('cappotte')"
-          >
-            Cappotte Spider
-          </button>
-          <button
-            type="button"
-            class="filter-pill"
-            [class.active]="selectedProjectCategory() === 'epoca'"
-            (click)="selectProjectFilter('epoca')"
-          >
-            Interni Auto d’Epoca
-          </button>
-          <button
-            type="button"
-            class="filter-pill"
-            [class.active]="selectedProjectCategory() === 'moto'"
-            (click)="selectProjectFilter('moto')"
-          >
-            Selle Moto &amp; Guzzi
-          </button>
-          <button
-            type="button"
-            class="filter-pill"
-            [class.active]="selectedProjectCategory() === 'moderne'"
-            (click)="selectProjectFilter('moderne')"
-          >
-            Cieli Auto Scollati
-          </button>
-        </div>
-      </div>
-
-      <div class="portfolio-grid">
-        @for (proj of filteredProjects(); track proj.id) {
-          <div class="portfolio-card">
-            <div class="portfolio-img-wrap">
-              <img [src]="proj.image" [alt]="proj.title" loading="lazy" />
-              <div class="portfolio-top-badges">
-                <span class="proj-cat">{{ proj.categoryLabel }}</span>
-                <span class="proj-year">{{ proj.year }}</span>
-              </div>
-
-              <!-- Interactive Before / After Toggle Bar -->
-              <div class="comparison-switcher">
-                <button
-                  type="button"
-                  [class.active]="getComparisonMode(proj.id) === 'before'"
-                  (click)="toggleComparison(proj.id, 'before')"
-                >
-                  Stato Prima
-                </button>
-                <button
-                  type="button"
-                  [class.active]="getComparisonMode(proj.id) === 'after'"
-                  (click)="toggleComparison(proj.id, 'after')"
-                >
-                  Dopo il Restauro ✨
-                </button>
-              </div>
-            </div>
-
-            <div class="portfolio-body">
-              <div class="proj-vehicle-line">
-                <span>{{ proj.vehicle }}</span>
-                <span class="proj-client">{{ proj.clientLocation }}</span>
-              </div>
-              <h3>{{ proj.title }}</h3>
-
-              <!-- Dynamic Before / After Box -->
-              @if (getComparisonMode(proj.id) === 'before') {
-                <div class="comparison-box is-before">
-                  <span class="comp-status-tag">PROBLEMATICA INIZIALE (PRIMA):</span>
-                  <p>{{ proj.beforeSummary }}</p>
-                </div>
-              } @else {
-                <div class="comparison-box is-after">
-                  <span class="comp-status-tag">RISULTATO TAPPEZZERIA SERRA (DOPO):</span>
-                  <p>{{ proj.afterSummary }}</p>
-                </div>
-              }
-
-              <div class="proj-specs-mini">
-                <div>
-                  <span class="mini-label">Materiali:</span>
-                  <strong>{{ proj.materialsUsed }}</strong>
-                </div>
-                <div>
-                  <span class="mini-label">Cucitura:</span>
-                  <strong>{{ proj.stitchingType }}</strong>
-                </div>
-              </div>
-
-              <div class="portfolio-card-footer">
-                <span class="hours-badge">⏱ {{ proj.hoursWorked }}</span>
-                <button type="button" class="btn-inspect" (click)="openProjectModal(proj)">
-                  Scheda Tecnica Completa
-                </button>
-              </div>
-            </div>
-          </div>
-        }
-      </div>
-
       <!-- Callout Banner per la Pagina Galleria Fotografica Dedicata -->
-      <div class="gallery-cta-banner stitch-frame">
+      <div class="gallery-cta-banner stitch-frame" style="margin-top: 0;">
         <div class="gallery-cta-copy">
           <span class="mono-tag">ARCHIVIO FOTOGRAFICO DEL LABORATORIO</span>
           <h3>Vuoi vedere tutte le foto dei nostri lavori in laboratorio?</h3>
