@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="leatherGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C87338" />
+      <stop offset="55%" stop-color="#9E4E1B" />
+      <stop offset="100%" stop-color="#5E290A" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5DFB0" />
+      <stop offset="100%" stop-color="#C9A66B" />
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded Cognac Leather Badge -->
+  <rect x="2" y="2" width="60" height="60" rx="14" ry="14" fill="url(#leatherGrad)" stroke="#E2C792" stroke-width="2" />
+
+  <!-- Saddle Stitch Inner Border -->
+  <rect
+    x="7"
+    y="7"
+    width="50"
+    height="50"
+    rx="10"
+    ry="10"
+    fill="none"
+    stroke="#F5DFB0"
+    stroke-width="1.6"
+    stroke-dasharray="4 3"
+    opacity="0.85"
+  />
+
+  <!-- TS Monogram -->
+  <text
+    x="32"
+    y="42"
+    text-anchor="middle"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-weight="bold"
+    font-size="28"
+    fill="#FFF9F0"
+    letter-spacing="1"
+  >TS</text>
+
+  <!-- Subtle Gold Crown / Steering & Stitch Accent at Top -->
+  <path d="M24 15 Q32 11 40 15" fill="none" stroke="url(#goldGrad)" stroke-width="2" stroke-linecap="round" />
+  <circle cx="32" cy="13" r="1.8" fill="#F5DFB0" />
+</svg>
