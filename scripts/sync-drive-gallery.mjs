@@ -17,31 +17,68 @@ function extractFolderId(input) {
   return '';
 }
 
-async function fetchDriveItems(folderId) {
-  if (!folderId) return [];
+function decodeHtmlEntities(str) {
+  return str
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+}
+
+async function fetchDriveFolderRecursive(folderId, folderPath = [], depth = 0, visited = new Set()) {
+  if (!folderId || depth > 5 || visited.has(folderId)) return [];
+  visited.add(folderId);
+
   const url = `https://drive.google.com/embeddedfolderview?id=${encodeURIComponent(folderId)}#list`;
-  console.log(`[DriveSync] Fetching public Drive folder: ${folderId}`);
+  const label = folderPath.length > 0 ? folderPath.join(' / ') : 'ROOT';
+  console.log(`[DriveSync] Scanning folder: ${label} (${folderId})`);
+
   const resp = await fetch(url, {
     headers: {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
     }
   });
   if (!resp.ok) {
-    throw new Error(`HTTP ${resp.status} fetching embeddedfolderview`);
+    console.warn(`[DriveSync] HTTP ${resp.status} for folder ${folderId}`);
+    return [];
   }
   const html = await resp.text();
 
-  const items = [];
-  const entryRegex = /<div class="flip-entry" id="entry-([a-zA-Z0-9_-]+)"[\s\S]*?<div class="flip-entry-title">([^<]+)<\/div>/g;
+  const files = [];
+  const subfolders = [];
+
+  const entryRegex = /<div class="flip-entry" id="entry-([a-zA-Z0-9_-]+)"[\s\S]*?<a href="([^"]+)"[\s\S]*?<div class="flip-entry-title">([^<]+)<\/div>/g;
   let match;
   while ((match = entryRegex.exec(html)) !== null) {
     const id = match[1].trim();
-    const name = match[2].trim();
-    if (id && name) {
-      items.push({ id, name });
+    const href = match[2].trim();
+    const name = decodeHtmlEntities(match[3].trim());
+    if (!id || !name) continue;
+
+    if (href.includes('/drive/folders/')) {
+      subfolders.push({ id, name });
+    } else {
+      files.push({
+        id,
+        name,
+        folderPath
+      });
     }
   }
-  return items;
+
+  // Scan subfolders in parallel
+  const subResults = await Promise.all(
+    subfolders.map((sub) =>
+      fetchDriveFolderRecursive(sub.id, [...folderPath, sub.name], depth + 1, visited)
+    )
+  );
+
+  for (const subFiles of subResults) {
+    files.push(...subFiles);
+  }
+
+  return files;
 }
 
 async function downloadPhoto(fileId, destFile) {
@@ -73,18 +110,20 @@ async function main() {
 
   if (folderId) {
     try {
-      const items = await fetchDriveItems(folderId);
-      console.log(`[DriveSync] Found ${items.length} file(s) in Drive folder.`);
+      const items = await fetchDriveFolderRecursive(folderId, []);
+      console.log(`[DriveSync] Found ${items.length} total file(s) across Drive folder tree.`);
       fs.mkdirSync(outDir, { recursive: true });
 
       for (const item of items) {
         const localFileName = `${item.id}.jpg`;
         const localFilePath = path.join(outDir, localFileName);
         const downloaded = await downloadPhoto(item.id, localFilePath);
-        console.log(`[DriveSync] - ${item.name} (${item.id}) -> downloaded: ${downloaded}`);
+        const pathStr = item.folderPath.length ? item.folderPath.join(' > ') + ' > ' : '';
+        console.log(`[DriveSync] - ${pathStr}${item.name} (${item.id}) -> downloaded: ${downloaded}`);
         preloadedItems.push({
           id: item.id,
           name: item.name,
+          folderPath: item.folderPath,
           localUrl: downloaded ? `drive-photos/${localFileName}` : undefined
         });
       }
@@ -102,6 +141,7 @@ async function main() {
 export interface RawDriveFileItem {
   id: string;
   name: string;
+  folderPath?: string[];
   description?: string;
   localUrl?: string;
 }
@@ -114,7 +154,7 @@ export const DRIVE_GALLERY_CONFIG: {
 } = {
   PUBLIC_DRIVE_FOLDER_LINK: ${JSON.stringify(rawLink)},
   GOOGLE_API_KEY: ${JSON.stringify(apiKey)},
-  INCLUDE_DEFAULT_WORKSHOP_PHOTOS: true,
+  INCLUDE_DEFAULT_WORKSHOP_PHOTOS: false,
   PRELOADED_DRIVE_ITEMS: ${JSON.stringify(preloadedItems, null, 2)}
 };
 `;

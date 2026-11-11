@@ -874,10 +874,26 @@
           <button
             type="button"
             class="filter-pill"
-            [class.active]="selectedGalleryCategory() === 'epoca'"
-            (click)="selectGalleryCategory('epoca')"
+            [class.active]="selectedGalleryCategory() === 'selle'"
+            (click)="selectGalleryCategory('selle')"
           >
-            Auto d’Epoca
+            Selle Moto &amp; Scooter
+          </button>
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="selectedGalleryCategory() === 'sedili'"
+            (click)="selectGalleryCategory('sedili')"
+          >
+            Sedili &amp; Interni
+          </button>
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="selectedGalleryCategory() === 'sottotetto'"
+            (click)="selectGalleryCategory('sottotetto')"
+          >
+            Sottotetto &amp; Cieli
           </button>
           <button
             type="button"
@@ -885,31 +901,15 @@
             [class.active]="selectedGalleryCategory() === 'cappotte'"
             (click)="selectGalleryCategory('cappotte')"
           >
-            Cappotte &amp; Spider
+            Cappotte &amp; Cabrio
           </button>
           <button
             type="button"
             class="filter-pill"
-            [class.active]="selectedGalleryCategory() === 'moto'"
-            (click)="selectGalleryCategory('moto')"
+            [class.active]="selectedGalleryCategory() === 'epoca'"
+            (click)="selectGalleryCategory('epoca')"
           >
-            Selle Moto &amp; Scooter
-          </button>
-          <button
-            type="button"
-            class="filter-pill"
-            [class.active]="selectedGalleryCategory() === 'moderne'"
-            (click)="selectGalleryCategory('moderne')"
-          >
-            Cieli &amp; Interni
-          </button>
-          <button
-            type="button"
-            class="filter-pill"
-            [class.active]="selectedGalleryCategory() === 'nautica-arredo'"
-            (click)="selectGalleryCategory('nautica-arredo')"
-          >
-            Nautica &amp; Arredo
+            Auto d’Epoca
           </button>
         </div>
 
@@ -949,7 +949,7 @@
                 />
                 <div class="gallery-photo-badges">
                   <span class="photo-cat-pill">{{ photo.categoryLabel }}</span>
-                  <span class="photo-bottega-pill">Bottega Bologna</span>
+                  <span class="photo-bottega-pill">{{ photo.subCategoryBadge || 'Bottega Bologna' }}</span>
                 </div>
                 <div class="gallery-zoom-hint">
                   <span>🔍 Clicca per ingrandire</span>

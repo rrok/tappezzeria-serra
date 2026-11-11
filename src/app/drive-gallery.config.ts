@@ -5,6 +5,7 @@
 export interface RawDriveFileItem {
   id: string;
   name: string;
+  folderPath?: string[];
   description?: string;
   localUrl?: string;
 }
@@ -17,6 +18,6 @@ export const DRIVE_GALLERY_CONFIG: {
 } = {
   PUBLIC_DRIVE_FOLDER_LINK: "",
   GOOGLE_API_KEY: "",
-  INCLUDE_DEFAULT_WORKSHOP_PHOTOS: true,
+  INCLUDE_DEFAULT_WORKSHOP_PHOTOS: false,
   PRELOADED_DRIVE_ITEMS: []
 };
