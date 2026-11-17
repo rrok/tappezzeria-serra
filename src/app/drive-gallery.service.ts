@@ -159,22 +159,27 @@ export class DriveGalleryService {
   }
 
   private mapItemsListToPhotos(items: RawDriveFileItem[]): GalleryPhoto[] {
-    // Raggruppa per cartella per numerare eventuali foto multiple (IMG_...) dentro la stessa sottocartella lavoro
     const folderCounts = new Map<string, number>();
     const folderIndices = new Map<string, number>();
 
     for (const item of items) {
+      const isCam = /^(IMG|DSC|PXL|PHOTO|Screenshot|WhatsApp|20\d{2}[-_]?\d{2}|\d{10,16})/i.test(
+        item.name.replace(/^\.+/, '').replace(/\.(jpe?g|png|webp|gif|avif|bmp|heic)$/i, '').trim()
+      );
       const key = (item.folderPath || []).join('/');
-      if (key) {
+      if (key && isCam) {
         folderCounts.set(key, (folderCounts.get(key) || 0) + 1);
       }
     }
 
     return items.map((item) => {
+      const isCam = /^(IMG|DSC|PXL|PHOTO|Screenshot|WhatsApp|20\d{2}[-_]?\d{2}|\d{10,16})/i.test(
+        item.name.replace(/^\.+/, '').replace(/\.(jpe?g|png|webp|gif|avif|bmp|heic)$/i, '').trim()
+      );
       const key = (item.folderPath || []).join('/');
       let indexInFolder = 1;
       let totalInFolder = 1;
-      if (key) {
+      if (key && isCam) {
         totalInFolder = folderCounts.get(key) || 1;
         indexInFolder = (folderIndices.get(key) || 0) + 1;
         folderIndices.set(key, indexInFolder);
@@ -241,7 +246,7 @@ export class DriveGalleryService {
     const cacheBuster = Date.now();
     const url = `https://r.jina.ai/https://drive.google.com/embeddedfolderview?id=${encodeURIComponent(folderId)}&_cb=${cacheBuster}`;
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 7500);
+    const timeout = setTimeout(() => controller.abort(), 8000);
 
     try {
       const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
@@ -254,7 +259,6 @@ export class DriveGalleryService {
       const files: RawDriveFileItem[] = [];
       const subfolders: Array<{ id: string; name: string }> = [];
 
-      // 1. Individua sottocartelle: [NomeCartella](https://drive.google.com/drive/folders/ID)
       const folderRegex = /\[([^\[\]\n\r]+)\]\(https:\/\/drive\.google\.com\/drive\/folders\/([a-zA-Z0-9_-]{15,})\)/g;
       let fMatch: RegExpExecArray | null;
       while ((fMatch = folderRegex.exec(text)) !== null) {
@@ -265,7 +269,6 @@ export class DriveGalleryService {
         }
       }
 
-      // 2. Individua file immagine (anche senza estensione .jpg nel titolo!)
       const fileRegex = /!\[Image\s+\d+\]\(https:\/\/drive-thirdparty\.googleusercontent\.com\/\d+\/type\/image\/[^)]+\)\s*([^\[\]\n\r]+?)\]\(https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]{15,})\/view/gi;
       let match: RegExpExecArray | null;
       while ((match = fileRegex.exec(text)) !== null) {
@@ -276,14 +279,15 @@ export class DriveGalleryService {
         }
       }
 
-      // 3. Esplora sottocartelle in parallelo
-      if (subfolders.length > 0) {
-        const subResults = await Promise.all(
-          subfolders.map((sub) =>
+      // Esegue la scansione delle sottocartelle a blocchi di 2 per evitare il rate-limit di r.jina.ai
+      for (let i = 0; i < subfolders.length; i += 2) {
+        const batch = subfolders.slice(i, i + 2);
+        const batchResults = await Promise.all(
+          batch.map((sub) =>
             this.fetchViaJinaReaderRecursive(sub.id, [...folderPath, sub.name], depth + 1, visited)
           )
         );
-        for (const subFiles of subResults) {
+        for (const subFiles of batchResults) {
           files.push(...subFiles);
         }
       }
@@ -310,20 +314,19 @@ export class DriveGalleryService {
   ): GalleryPhoto {
     const rawFolders = (file.folderPath || []).map((f) => f.trim()).filter(Boolean);
 
-    // Pulisce il nome del file da punti iniziali ed estensioni immagine
     const cleanFileName = file.name
       .replace(/^\.+/, '')
       .replace(/\.(jpe?g|png|webp|gif|avif|bmp|heic)$/i, '')
       .trim();
 
-    // Verifica se il file ha un nome generico da fotocamera/WhatsApp (es. IMG-20220914-WA0085)
-    const isCameraFileName = /^(IMG|DSC|PXL|PHOTO|Screenshot|WhatsApp|20\d{2}[-_]\d{2})/i.test(cleanFileName);
+    const isCameraFileName = /^(IMG|DSC|PXL|PHOTO|Screenshot|WhatsApp|20\d{2}[-_]?\d{2}|\d{10,16})/i.test(cleanFileName);
 
-    // Normalizza nomi composti comuni prima di dividere sui trattini (es. "t-max" -> "T-Max", "alfa-romeo" -> "Alfa Romeo")
     const normalizeCompoundModels = (input: string): string =>
       input
         .replace(/\bt[\s_-]*max\b/gi, 'T Max')
         .replace(/\balfa[\s_-]*romeo\b/gi, 'Alfa Romeo')
+        .replace(/\bsmart[\s_-]*450\b/gi, 'Smart 450')
+        .replace(/\bsistituzione\b/gi, 'Sostituzione')
         .replace(/\btryumph\b/gi, 'Triumph')
         .replace(/\bacannelloni\b/gi, 'a cannelloni')
         .replace(/\besaonali\b/gi, 'esagonali')
@@ -332,7 +335,6 @@ export class DriveGalleryService {
         .replace(/\bseie\b/gi, 'serie')
         .replace(/\bporche\b/gi, 'Porsche');
 
-    // Costruisce la catena di segmenti (dalle cartelle + dal nome file se non è IMG_...)
     const rawSources: string[] = [...rawFolders];
     if (!isCameraFileName && cleanFileName) {
       rawSources.push(cleanFileName);
@@ -348,38 +350,41 @@ export class DriveGalleryService {
       segments.push(...parts);
     }
 
+    const topFolderLower = (rawFolders[0] || '').toLowerCase();
     const fullCombinedLower = [...rawFolders, cleanFileName].join(' ').toLowerCase();
 
-    // 1. Determina la Categoria principale (5 categorie ufficiali della bottega)
+    // 1. PRIORITÀ ASSOLUTA ALLA CARTELLA PRINCIPALE DI DRIVE (Selle, Sedili, Sottotetto, Cappotte, Epoca)
     let category: Exclude<GalleryCategory, 'tutti'> = 'epoca';
     let categoryLabel = 'Auto d’Epoca';
     let subCategoryBadge: string | undefined;
 
-    const firstTokenLower = (segments[0] || '').toLowerCase();
-
-    if (/^(sell[ae]|moto|scooter)$/i.test(firstTokenLower)) {
-      category = 'selle';
-      categoryLabel = 'Selle Moto & Scooter';
-    } else if (/^(sedil[ei]|intern[oi])$/i.test(firstTokenLower)) {
-      category = 'sedili';
-      categoryLabel = 'Sedili & Interni';
-    } else if (/^(sottotett[oi]|ciel[oi]|imperial[ei])$/i.test(firstTokenLower)) {
+    if (/^(sottotett|ciel|imperial)/i.test(topFolderLower)) {
       category = 'sottotetto';
       categoryLabel = 'Sottotetto & Cieli';
-    } else if (/^(cappott[ae]|capot[ae]|lunott[oi]|cabrio|spider)$/i.test(firstTokenLower)) {
+    } else if (/^(cappott|capot|lunott|cabrio|spider)/i.test(topFolderLower)) {
       category = 'cappotte';
       categoryLabel = 'Cappotte & Cabrio';
-    } else if (/^(epoca|storic[ao]|restaur[oi])$/i.test(firstTokenLower)) {
+    } else if (/^(epoca|storic)/i.test(topFolderLower)) {
       category = 'epoca';
       categoryLabel = 'Auto d’Epoca';
+    } else if (/^(sedil|intern)/i.test(topFolderLower)) {
+      category = 'sedili';
+      categoryLabel = 'Sedili & Interni';
+    } else if (/^(sell|moto|scooter)/i.test(topFolderLower)) {
+      category = 'selle';
+      categoryLabel = 'Selle Moto & Scooter';
     } else {
-      // Rilevamento automatico dalle parole chiave se il file è nella root senza cartella
-      if (/(cappott|capot|lunotto|maggiolone|smart\s*cabrio|spider|cabrio|sonnenland)/i.test(fullCombinedLower)) {
-        category = 'cappotte';
-        categoryLabel = 'Cappotte & Cabrio';
-      } else if (/(sottotett|ciel[oi]|imperial)/i.test(fullCombinedLower)) {
+      // Se il file è fuori dalle 5 cartelle (o durante il caricamento live), controlla le parole chiave specifiche
+      // NOTA: "sottotetto" e "cappotte/lunotto" hanno priorità su "interni/sedili" (es. "Interni-pelle-sottotetto...")
+      if (/(sottotett|ciel[oi]|imperial)/i.test(fullCombinedLower)) {
         category = 'sottotetto';
         categoryLabel = 'Sottotetto & Cieli';
+      } else if (/(cappott|capot|lunotto|maggiolone|smart\s*cabrio|smart\s*450|spider|cabrio|sonnenland)/i.test(fullCombinedLower)) {
+        category = 'cappotte';
+        categoryLabel = 'Cappotte & Cabrio';
+      } else if (/(porsche\s*914|epoca|storic|targa\s*oro)/i.test(fullCombinedLower)) {
+        category = 'epoca';
+        categoryLabel = 'Auto d’Epoca';
       } else if (/(sell[ae]|moto\b|scooter|t[\s_-]*max|vespa|gilera|runner|honda|cn\b|triumph|tryumph|guzzi|ducati|yamaha|harley|kawasaki)/i.test(fullCombinedLower)) {
         category = 'selle';
         categoryLabel = 'Selle Moto & Scooter';
@@ -392,7 +397,6 @@ export class DriveGalleryService {
       }
     }
 
-    // Rileva eventuale sotto-badge Moto / Scooter per la categoria Selle
     if (category === 'selle') {
       if (segments.some((s) => /^scooter$/i.test(s)) || /(scooter|t\s*max|vespa|gilera|runner|honda\s*cn|\bcn\b)/i.test(fullCombinedLower)) {
         subCategoryBadge = 'Scooter';
@@ -401,19 +405,18 @@ export class DriveGalleryService {
       }
     }
 
-    // 2. Rimuove i token iniziali che indicano solo la categoria (es. "Selle", "Moto", "Scooter", "Sedili", "Interni", "Sottotetto", "Cappotte", "Epoca")
+    // 2. Rimuove i token iniziali che indicano solo la categoria o il materiale generico
     const contentSegments = [...segments];
     while (
       contentSegments.length > 0 &&
-      /^(sell[ae]|moto|scooter|sedil[ei]|intern[oi]|sottotett[oi]|ciel[oi]|cappott[ae]|capot[ae]|lunott[oi]|epoca)$/i.test(
+      /^(sell[ae]|moto|scooter|sedil[ei]|intern[oi]|sottotett[oi]|ciel[oi]|cappott[ae]|capot[ae]|lunott[oi]|epoca|pelle)$/i.test(
         contentSegments[0]
       )
     ) {
       contentSegments.shift();
     }
 
-    // 3. Costruisce Titolo (Modello) e Descrizione seguendo lo schema:
-    //    CATEGORIA - [MOTO/SCOOTER] - MODELLO - DESCRIZIONE
+    // 3. Costruisce Titolo (Modello) e Descrizione
     let rawTitle = '';
     let rawDescription = '';
 
@@ -422,7 +425,6 @@ export class DriveGalleryService {
       rawDescription = contentSegments.slice(1).join(' – ');
     } else if (contentSegments.length === 1) {
       const single = contentSegments[0];
-      // Se è una frase unica tipo "T Max 530 con cuciture su specifiche del cliente", separa modello e descrizione
       const splitMatch = single.match(/^(.+?)\s+(con\s+.+|su\s+specifiche.*|in\s+pelle.*|a\s+esagoni.*|a\s+cannelloni.*|a\s+rombi.*|cuciture\s+.*)$/i);
       if (splitMatch) {
         rawTitle = splitMatch[1].trim();
@@ -448,7 +450,6 @@ export class DriveGalleryService {
 
     let finalTitle = formatTitleCase(rawTitle);
 
-    // Se ci sono più foto IMG_... nella stessa sottocartella progetto, aggiunge il numero foto
     if (isCameraFileName && totalInFolder > 1) {
       finalTitle = `${finalTitle} (Foto ${indexInFolder}/${totalInFolder})`;
     }
