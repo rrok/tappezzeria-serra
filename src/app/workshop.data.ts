@@ -68,6 +68,10 @@ export const WORKSHOP_INFO = {
   district: 'Quartiere Borgo Panigale - Reno (Zona Santa Viola)',
   phoneDisplay: '051 382482',
   phoneHref: 'tel:+39051382482',
+  emergencyPhoneDisplay: '348 761 2110',
+  emergencyPhoneHref: 'tel:+393487612110',
+  // Visibile solo per 2 giorni (48 ore) dal 19/11/2026 ore 10:25 fino al 21/11/2026 ore 10:30
+  emergencyPhoneExpiresAt: new Date('2026-11-21T10:30:00+01:00').getTime(),
   email: 'tappezzeriaserra.bo@gmail.com',
   partitaIva: '03397670377',
   codiceAteco: '95.24.02 – Laboratori di tappezzeria artigianale',

@@ -43,6 +43,9 @@ export class App implements OnInit {
   // Back to top button visibility when scrolling down
   readonly showBackToTop = signal(false);
 
+  // Numero di emergenza temporaneo (attivo solo per 2 giorni / 48 ore)
+  readonly isEmergencyPhoneActive = signal<boolean>(Date.now() < WORKSHOP_INFO.emergencyPhoneExpiresAt);
+
   // Google Drive Dedicated Gallery State
   readonly galleryPhotos = signal<GalleryPhoto[]>(this.driveGalleryService.getInitialPhotos());
   readonly galleryLoading = signal<boolean>(false);
@@ -192,8 +195,14 @@ export class App implements OnInit {
 
   ngOnInit(): void {
     this.updateWorkshopStatus();
+    this.checkEmergencyPhoneExpiration();
+    setInterval(() => this.checkEmergencyPhoneExpiration(), 60_000);
     this.syncPageFromUrl();
     this.loadDriveGallery();
+  }
+
+  private checkEmergencyPhoneExpiration(): void {
+    this.isEmergencyPhoneActive.set(Date.now() < WORKSHOP_INFO.emergencyPhoneExpiresAt);
   }
 
   private syncPageFromUrl(): void {
