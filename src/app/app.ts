@@ -396,28 +396,25 @@ export class App implements OnInit {
     this.quoteSubmitted.set(true);
   }
 
-  getMailtoLink(): string {
-    const subject = encodeURIComponent(
-      `Richiesta Preventivo Tappezzeria - ${this.quoteForm.serviceType} (${this.quoteForm.vehicleModel || 'Veicolo'})`
-    );
+  getWhatsAppLink(): string {
     const bodyLines = [
-      `Buongiorno Tappezzeria Serra (Famiglia Sindoni),`,
+      `Buongiorno *Tappezzeria Serra* (Famiglia Sindoni),`,
       ``,
-      `Vorrei richiedere informazioni / un preventivo orientativo per il seguente lavoro:`,
-      `- Tipologia intervento: ${this.quoteForm.serviceType}`,
-      `- Materiale preferito: ${this.quoteForm.materialPreference}`,
-      `- Veicolo / Modello: ${this.quoteForm.vehicleModel || 'Da specificare'} ${this.quoteForm.vehicleYear ? '(' + this.quoteForm.vehicleYear + ')' : ''}`,
+      `Vorrei richiedere un preventivo / informazioni per il seguente lavoro:`,
+      `• *Tipologia intervento:* ${this.quoteForm.serviceType}`,
+      `• *Materiale preferito:* ${this.quoteForm.materialPreference}`,
+      `• *Veicolo / Modello:* ${this.quoteForm.vehicleModel || 'Da specificare'} ${this.quoteForm.vehicleYear ? '(' + this.quoteForm.vehicleYear + ')' : ''}`,
       ``,
-      `Note sul lavoro:`,
-      `${this.quoteForm.notes || 'Nessuna nota aggiuntiva.'}`,
+      `*Dettagli sul lavoro richiesto:*`,
+      `${this.quoteForm.notes || 'Nessun dettaglio aggiuntivo indicato.'}`,
       ``,
-      `I miei recapiti:`,
-      `- Nome: ${this.quoteForm.customerName || 'Cliente'}`,
-      `- Telefono: ${this.quoteForm.customerPhone || 'Non indicato'}`,
+      `*I miei recapiti:*`,
+      `• *Nome:* ${this.quoteForm.customerName || 'Cliente'}`,
+      `• *Telefono:* ${this.quoteForm.customerPhone || 'Non indicato'}`,
       ``,
       `Grazie e cordiali saluti.`
     ];
-    return `mailto:${this.info.email}?subject=${subject}&body=${encodeURIComponent(bodyLines.join('\n'))}`;
+    return `https://wa.me/${this.info.whatsappNumber}?text=${encodeURIComponent(bodyLines.join('\n'))}`;
   }
 
   copySummaryToClipboard(): void {

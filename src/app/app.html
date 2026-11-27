@@ -754,8 +754,8 @@
                 </div>
               </div>
               <div class="ready-actions">
-                <a [href]="getMailtoLink()" class="btn-send-email">
-                  ✉ Invia Email a {{ info.email }}
+                <a [href]="getWhatsAppLink()" target="_blank" rel="noopener" class="btn-send-email btn-send-whatsapp">
+                  💬 Invia su WhatsApp al {{ info.phoneDisplay }}
                 </a>
                 <button type="button" class="btn-copy-summary" (click)="copySummaryToClipboard()">
                   {{ copiedConfirmation() ? '✓ Riepilogo Copiato!' : 'Copia testo riepilogo' }}
