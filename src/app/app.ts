@@ -164,6 +164,25 @@ export class App implements OnInit {
 
   readonly quoteSubmitted = signal(false);
   readonly copiedConfirmation = signal(false);
+  readonly imageCopiedHint = signal(false);
+
+  // Allegati foto/file per il preventivo su WhatsApp
+  readonly quoteAttachments = signal<
+    Array<{
+      id: string;
+      file: File;
+      name: string;
+      sizeLabel: string;
+      previewUrl: string;
+      isImage: boolean;
+      uploadedUrl?: string;
+      uploading: boolean;
+    }>
+  >([]);
+
+  readonly hasUploadingAttachments = computed(() =>
+    this.quoteAttachments().some((a) => a.uploading)
+  );
 
   // Crafting steps in the Sindoni workshop
   readonly craftSteps = [
@@ -396,7 +415,147 @@ export class App implements OnInit {
     this.quoteSubmitted.set(true);
   }
 
-  getWhatsAppLink(): string {
+  onQuoteFilesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const selectedFiles = Array.from(input.files);
+    for (const file of selectedFiles) {
+      const id = `att-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      const isImage = file.type.startsWith('image/');
+      const previewUrl = isImage ? URL.createObjectURL(file) : '';
+      const sizeKb = Math.max(1, Math.round(file.size / 1024));
+      const sizeLabel = sizeKb >= 1024 ? `${(sizeKb / 1024).toFixed(1)} MB` : `${sizeKb} KB`;
+
+      this.quoteAttachments.update((list) => [
+        ...list,
+        {
+          id,
+          file,
+          name: file.name,
+          sizeLabel,
+          previewUrl,
+          isImage,
+          uploading: true
+        }
+      ]);
+
+      this.uploadAttachmentForWhatsApp(id, file);
+    }
+
+    input.value = '';
+  }
+
+  removeQuoteAttachment(id: string): void {
+    this.quoteAttachments.update((list) => {
+      const target = list.find((a) => a.id === id);
+      if (target?.previewUrl) {
+        URL.revokeObjectURL(target.previewUrl);
+      }
+      return list.filter((a) => a.id !== id);
+    });
+  }
+
+  private async uploadAttachmentForWhatsApp(id: string, file: File): Promise<void> {
+    try {
+      const fd = new FormData();
+      fd.append('file', file, file.name);
+      const res = await fetch('https://tmpfiles.org/api/v1/upload', {
+        method: 'POST',
+        body: fd
+      });
+      if (res.ok) {
+        const json = await res.json();
+        const rawUrl: string | undefined = json?.data?.url;
+        if (rawUrl) {
+          this.quoteAttachments.update((list) =>
+            list.map((a) => (a.id === id ? { ...a, uploadedUrl: rawUrl, uploading: false } : a))
+          );
+          return;
+        }
+      }
+    } catch {
+      // fallback se l'upload cloud non è raggiungibile
+    }
+    this.quoteAttachments.update((list) =>
+      list.map((a) => (a.id === id ? { ...a, uploading: false } : a))
+    );
+  }
+
+  canShareNativeFiles(): boolean {
+    const attachments = this.quoteAttachments();
+    if (attachments.length === 0) return false;
+    const nav = navigator as Navigator & { canShare?: (data?: ShareData) => boolean };
+    if (typeof nav.share !== 'function' || typeof nav.canShare !== 'function') return false;
+    try {
+      return nav.canShare({ files: attachments.map((a) => a.file) });
+    } catch {
+      return false;
+    }
+  }
+
+  async shareNativeWithFiles(): Promise<void> {
+    const attachments = this.quoteAttachments();
+    const nav = navigator as Navigator & { share?: (data?: ShareData) => Promise<void> };
+    if (!nav.share || attachments.length === 0) return;
+    try {
+      await nav.share({
+        title: `Richiesta Preventivo Tappezzeria Serra (${this.info.phoneDisplay})`,
+        text: this.buildWhatsAppMessageText(),
+        files: attachments.map((a) => a.file)
+      });
+    } catch {
+      // utente ha chiuso il pannello di condivisione
+    }
+  }
+
+  async onWhatsAppClick(): Promise<void> {
+    // Copia automaticamente la prima foto negli appunti così l'utente può anche fare Incolla (Ctrl+V) nella chat WhatsApp
+    const firstImg = this.quoteAttachments().find((a) => a.isImage);
+    if (firstImg && navigator.clipboard && typeof ClipboardItem !== 'undefined') {
+      try {
+        const pngBlob = await this.convertFileToPngBlob(firstImg.file);
+        if (pngBlob) {
+          await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob })]);
+          this.imageCopiedHint.set(true);
+          setTimeout(() => this.imageCopiedHint.set(false), 6000);
+        }
+      } catch {
+        // clipboard image non supportata dal browser
+      }
+    }
+  }
+
+  private convertFileToPngBlob(file: File): Promise<Blob | null> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth || img.width;
+        canvas.height = img.naturalHeight || img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          URL.revokeObjectURL(url);
+          resolve(null);
+          return;
+        }
+        ctx.drawImage(img, 0, 0);
+        canvas.toBlob((blob) => {
+          URL.revokeObjectURL(url);
+          resolve(blob);
+        }, 'image/png');
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve(null);
+      };
+      img.src = url;
+    });
+  }
+
+  private buildWhatsAppMessageText(): string {
+    const attachments = this.quoteAttachments();
     const bodyLines = [
       `Buongiorno *Tappezzeria Serra* (Famiglia Sindoni),`,
       ``,
@@ -406,15 +565,34 @@ export class App implements OnInit {
       `• *Veicolo / Modello:* ${this.quoteForm.vehicleModel || 'Da specificare'} ${this.quoteForm.vehicleYear ? '(' + this.quoteForm.vehicleYear + ')' : ''}`,
       ``,
       `*Dettagli sul lavoro richiesto:*`,
-      `${this.quoteForm.notes || 'Nessun dettaglio aggiuntivo indicato.'}`,
+      `${this.quoteForm.notes || 'Nessun dettaglio aggiuntivo indicato.'}`
+    ];
+
+    if (attachments.length > 0) {
+      bodyLines.push(``, `*📎 Foto / Allegati del lavoro (${attachments.length}):*`);
+      attachments.forEach((att, idx) => {
+        if (att.uploadedUrl) {
+          bodyLines.push(`• Foto ${idx + 1} (${att.name}): ${att.uploadedUrl}`);
+        } else {
+          bodyLines.push(`• Allegato ${idx + 1}: ${att.name} (inviato in chat)`);
+        }
+      });
+    }
+
+    bodyLines.push(
       ``,
       `*I miei recapiti:*`,
       `• *Nome:* ${this.quoteForm.customerName || 'Cliente'}`,
       `• *Telefono:* ${this.quoteForm.customerPhone || 'Non indicato'}`,
       ``,
       `Grazie e cordiali saluti.`
-    ];
-    return `https://wa.me/${this.info.whatsappNumber}?text=${encodeURIComponent(bodyLines.join('\n'))}`;
+    );
+
+    return bodyLines.join('\n');
+  }
+
+  getWhatsAppLink(): string {
+    return `https://wa.me/${this.info.whatsappNumber}?text=${encodeURIComponent(this.buildWhatsAppMessageText())}`;
   }
 
   copySummaryToClipboard(): void {

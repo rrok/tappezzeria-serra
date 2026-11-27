@@ -714,6 +714,61 @@
               ></textarea>
             </div>
 
+            <!-- Allegati Foto / File per WhatsApp -->
+            <div class="form-group">
+              <label for="quoteAttachmentsInput">Foto o Allegati del Lavoro per WhatsApp (opzionale)</label>
+              <div class="attachment-upload-zone">
+                <input
+                  type="file"
+                  id="quoteAttachmentsInput"
+                  multiple
+                  accept="image/*,.pdf"
+                  class="attachment-file-input"
+                  (change)="onQuoteFilesSelected($event)"
+                />
+                <label for="quoteAttachmentsInput" class="btn-attach-files">
+                  📷 Aggiungi Foto / Allegati da inviare su WhatsApp
+                </label>
+                <span class="attachment-hint">
+                  Le foto caricate vengono allegate in automatico come link diretti nel messaggio WhatsApp al {{ info.phoneDisplay }} (e copiate negli appunti pronte da incollare in chat).
+                </span>
+              </div>
+
+              @if (quoteAttachments().length > 0) {
+                <div class="attachments-preview-list">
+                  @for (att of quoteAttachments(); track att.id) {
+                    <div class="attachment-chip">
+                      @if (att.isImage && att.previewUrl) {
+                        <img [src]="att.previewUrl" [alt]="att.name" class="attachment-thumb" />
+                      } @else {
+                        <span class="attachment-file-icon">📄</span>
+                      }
+                      <div class="attachment-meta">
+                        <strong class="attachment-name">{{ att.name }}</strong>
+                        <span class="attachment-status" [class.ready]="!att.uploading">
+                          @if (att.uploading) {
+                            ⏳ Preparazione allegato per WhatsApp...
+                          } @else if (att.uploadedUrl) {
+                            ✓ Allegato pronto per WhatsApp ({{ att.sizeLabel }})
+                          } @else {
+                            ✓ Pronto da incollare in chat ({{ att.sizeLabel }})
+                          }
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        class="btn-remove-attachment"
+                        (click)="removeQuoteAttachment(att.id)"
+                        title="Rimuovi allegato"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
             <div class="form-submit-row">
               <button type="submit" class="btn-submit-craft">
                 Genera Riepilogo Richiesta Preventivo
@@ -752,11 +807,50 @@
                   <strong>Dettagli sul lavoro richiesto:</strong>
                   <p>{{ quoteForm.notes || 'Nessun dettaglio aggiuntivo indicato.' }}</p>
                 </div>
+
+                @if (quoteAttachments().length > 0) {
+                  <div class="ready-attachments-block">
+                    <strong>📎 Allegati inclusi nel messaggio WhatsApp ({{ quoteAttachments().length }}):</strong>
+                    <div class="ready-thumbs-row">
+                      @for (att of quoteAttachments(); track att.id) {
+                        <div class="ready-thumb-item">
+                          @if (att.isImage && att.previewUrl) {
+                            <img [src]="att.previewUrl" [alt]="att.name" />
+                          }
+                          <span>{{ att.name }}</span>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
               </div>
+
+              @if (imageCopiedHint()) {
+                <div class="clipboard-photo-notice">
+                  ✓ Foto copiata anche negli appunti: quando si apre la chat WhatsApp con il {{ info.phoneDisplay }} puoi anche fare <strong>Incolla (Ctrl+V)</strong>!
+                </div>
+              }
+
               <div class="ready-actions">
-                <a [href]="getWhatsAppLink()" target="_blank" rel="noopener" class="btn-send-email btn-send-whatsapp">
-                  💬 Invia su WhatsApp al {{ info.phoneDisplay }}
+                <a
+                  [href]="getWhatsAppLink()"
+                  target="_blank"
+                  rel="noopener"
+                  class="btn-send-email btn-send-whatsapp"
+                  [class.disabled-link]="hasUploadingAttachments()"
+                  (click)="onWhatsAppClick()"
+                >
+                  @if (hasUploadingAttachments()) {
+                    ⏳ Caricamento allegati per WhatsApp...
+                  } @else {
+                    💬 Invia Preventivo{{ quoteAttachments().length > 0 ? ' + Allegati' : '' }} su WhatsApp ({{ info.phoneDisplay }})
+                  }
                 </a>
+                @if (canShareNativeFiles()) {
+                  <button type="button" class="btn-copy-summary btn-share-native" (click)="shareNativeWithFiles()">
+                    📲 Condividi File Foto Direttamente sull’App
+                  </button>
+                }
                 <button type="button" class="btn-copy-summary" (click)="copySummaryToClipboard()">
                   {{ copiedConfirmation() ? '✓ Riepilogo Copiato!' : 'Copia testo riepilogo' }}
                 </button>
